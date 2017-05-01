@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{2275bd26-e434-49b8-af1f-9be207f30b77}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\render\vertexdata.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\render\renderstate.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\render\shaderprogram.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\render\pipeline.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\render\pixelbuffer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\render\rendersystem.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\render\gpucommand.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\render\d3dsupport.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\render\d3dx12.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\render\linearallocator.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\render\rootsignature.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\render\descriptorheap.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\render\drawcall.h">
+      <Filter>src</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\render\vertexdata.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\render\d3dsupport.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\render\linearallocator.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\render\pixelbuffer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\render\renderstate.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\render\shaderprogram.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\render\descriptorheap.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\render\rootsignature.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\render\pipeline.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\render\gpucommand.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\render\rendersystem.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\render\drawcall.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

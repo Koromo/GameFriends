@@ -1,0 +1,81 @@
+// This is comment.
+/*
+   This is
+   comment.
+*/
+
+// Material parameters.
+Parameters {
+    float x;
+    float4 xyzw;
+    float4x4 matrix;
+    tex2d colorful;
+    
+    float foo;
+    float4x4 foo; // Error!
+}
+
+// Shaders definition.
+Shaders {
+    // Vertex shader definition with reference name "vsName".
+    Ref vsName {
+        /** Compile options. **/
+        path = files/yourpath; // Shader file path.
+        entry = vs_main; // Entry point of this shader.
+
+        /** Parameter mappings. **/
+        // Map material parameter "xyzw" to shader constant "coffee".
+        map(xyzw, coffee);
+
+        // Map material parameter "colorful" to shader texture "seven_sea".
+        map(colorful, seven_sea);
+
+        // "_World" is a parameter defined automatically, when render 3D scene. Furthermore information, see the Note[4].
+        map(_World, transform);
+    }
+
+    // Pixel shader with "psName".
+    Ref psName {
+        // Input your codes...
+    }
+
+    // You can define the same shader stages.
+    // However, the reference name needs to guarantee unique.
+    Ref otherShader { ... }
+    Ref psName { ... } // Error!
+}
+
+// Pass definition with priority.
+Pass 0 {
+    /** Shader stage options. **/
+    // Set shader stages by reference name.
+    vertexShader = vsName;
+    pixelShader = psName;
+    geometryShader = gsName;
+
+    /** Depth stencil test options. **/
+    // Is depth test enable?
+    depthTest = true; // true or false (true)
+
+    // Depth test function.
+    // never, equal, notEqual, less, lessEqual, greater, greaterEqual or always (less)
+    depthFun = lessEqual;
+
+    /** Rasterizer stage options. **/
+    // Fill mode
+    fillMode = wireframe; // wireframe or solid (solid)
+
+    // Culling face
+    cullFace = front; // none, front or back (back)    
+
+    // Is depth clipping enable?
+    depthClip = false; // true or false (true)
+}
+
+/*
+Note[1] Abstruct
+Note[2] Standards
+Note[3] Future note and Bugs
+Note[4] Abount parameters automatically defined
+ "_World", "_View", "_Proj", "_Trans"
+*/
