@@ -48,7 +48,7 @@ void DebugDraw::drawDebugs(const RenderCamera& camera)
     copy.uploadVertices(*vertex_);
     graphics.drawableState(*vertex_);
 
-    material_->setFloat4x4("ViewProj", transpose(camera.view * camera.proj));
+    material_->setFloat4x4("ViewProj", (camera.view * camera.proj).transpose());
 
     auto& pass = material_->passNth(0);
     auto drawCall = pass.drawCallBase();

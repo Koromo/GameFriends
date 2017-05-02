@@ -25,17 +25,19 @@ struct AxisAlignedBox
     AxisAlignedBox() = default;
     AxisAlignedBox(const Vector3& min, const Vector3& max);
 
+    Vector3 corner(size_t n) const;
+    Vector3 centroid() const;
+    AxisAlignedBox transform(const Matrix44& m) const;
+
+    void merge(const Vector3& p);
+    void merge(const AxisAlignedBox& box);
+
+    bool contains(const Vector3& p) const;
+    bool contains(const AxisAlignedBox& box) const;
+    float intersects(const Vector3& origin, const Vector3& dir) const; /// NODE: unit dir
+
     static const AxisAlignedBox NEGATIVE;
 };
-
-Vector3 corner(const AxisAlignedBox& box, size_t n);
-Vector3 centroid(const AxisAlignedBox& box);
-AxisAlignedBox merge(const AxisAlignedBox& box, const Vector3& p);
-AxisAlignedBox merge(const AxisAlignedBox& boxA, const AxisAlignedBox& boxB);
-bool contains(const AxisAlignedBox& box, const Vector3& p);
-bool contains(const AxisAlignedBox& box, const AxisAlignedBox& innerTest);
-float intersects(const AxisAlignedBox& box, const Vector3& rayOrigin, const Vector3& rayDir);
-AxisAlignedBox transform(const AxisAlignedBox& box, const Matrix44& m);
 
 GF_NAMESPACE_END
 

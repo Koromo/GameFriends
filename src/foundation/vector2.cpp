@@ -33,9 +33,30 @@ float& Vector2::operator [](size_t i)
     }
 }
 
+float Vector2::norm() const
+{
+    return std::sqrt(x * x + y * y);
+}
+
+float Vector2::dot(const Vector2& v) const
+{
+    return x * v.x + y * v.y;
+}
+
 Vector3 Vector2::xyz(float z) const
 {
     return{ x, y, z };
+}
+
+void Vector2::normalize()
+{
+    check(!equalf(norm(), 0));
+    *this /= norm();
+}
+
+void Vector2::scale(const Vector2& k)
+{
+    *this = { x * k.x, y * k.y };
 }
 
 bool operator ==(const Vector2& a, const Vector2& b)
@@ -108,32 +129,6 @@ Vector2& operator /=(Vector2& v, float k)
     check(!equalf(k, 0));
     v = v / k;
     return v;
-}
-
-Vector2 scale(const Vector2& v, const Vector2& k)
-{
-    return{ v.x * k.x, v.y * k.y };
-}
-
-Vector2 invScale(const Vector2& v, const Vector2& k)
-{
-    return{ v.x / k.x, v.y / k.y };
-}
-
-float norm(const Vector2& v)
-{
-    return std::sqrt(v.x * v.x + v.y * v.y);
-}
-
-Vector2 normalize(const Vector2& v)
-{
-    check(!equalf(norm(v), 0));
-    return v / norm(v);
-}
-
-float dotProduct(const Vector2& a, const Vector2& b)
-{
-    return a.x * b.x + a.y * b.y;
 }
 
 GF_NAMESPACE_END

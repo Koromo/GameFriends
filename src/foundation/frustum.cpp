@@ -4,7 +4,7 @@
 
 GF_NAMESPACE_BEGIN
 
-Frustum makeFrustumFromMatrix(const Matrix44& m)
+Frustum makeFrustum(const Matrix44& m)
 {
     const auto col0 = m.column(0);
     const auto col1 = m.column(1);
@@ -20,11 +20,12 @@ Frustum makeFrustumFromMatrix(const Matrix44& m)
     vecPlanes[5] = col3 - col2;
 
     Frustum frustum;
+
     for (int i = 0; i < 6; ++i)
     {
         frustum.planes[i].n = vecPlanes[i].xyz();
         frustum.planes[i].d = vecPlanes[i].w;
-        frustum.planes[i] = normalize(frustum.planes[i]);
+        frustum.planes[i].normalize();
     }
 
     for (int i = 0; i<8; i++)

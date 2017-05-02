@@ -13,13 +13,18 @@ struct Plane
 
     Plane() = default;
     Plane(const Vector3& n_, float d_);
+
+    float dotCoord(const Vector3& v) const;
+    float dotNormal(const Vector3& v) const;
+
+    /// NODE: unit dir
+    /// TODO: IDK when non unit planes
+    float intersects(const Vector3& origin, const Vector3& dir) const;
+
+    void normalize();
 };
 
-Plane normalize(const Plane& p);
-float dotCoord(const Plane& p, const Vector3& v);
-float dotNormal(const Plane& p, const Vector3& v);
-float intersects(const Plane& p, const Vector3& rayOrigin, const Vector3& rayDir); /// TODO: IDK for non unit planes
-bool intersects(const Plane& p0, const Plane& p1, const Plane& p2, Vector3* at);  /// TODO: IDK for non unit planes
+bool intersects(const Plane& p0, const Plane& p1, const Plane& p2, Vector3* at); /// TODO: IDK when non unit planes
 
 GF_NAMESPACE_END
 

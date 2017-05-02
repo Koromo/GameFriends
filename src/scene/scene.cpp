@@ -41,8 +41,8 @@ void RenderWorld::draw(const RenderCamera& camera)
 
     graphics.clearDepthTarget(depthTarget, 1);
 
-    const auto view_T = transpose(camera.view);
-    const auto proj_T = transpose(camera.proj);
+    const auto view_T = camera.view.transpose();
+    const auto proj_T = camera.proj.transpose();
 
     for (const auto& entity : entities_)
     {
@@ -52,7 +52,7 @@ void RenderWorld::draw(const RenderCamera& camera)
             continue;
         }
 
-        const auto world_T = transpose(entity->worldMatrix);
+        const auto world_T = entity->worldMatrix.transpose();
         for (auto surfaces = mesh->surfaces(); surfaces.first != surfaces.second; ++surfaces.first)
         {
             auto& surface = *surfaces.first;

@@ -42,6 +42,9 @@ public:
 
     Vector4 row(size_t r) const;
     Vector4 column(size_t c) const;
+    float determinant() const;
+    Matrix44 transpose() const;
+    Matrix44 inverse() const;
 
     static const Matrix44 IDENTITY;
 };
@@ -65,11 +68,6 @@ Matrix44& operator *=(Matrix44& a, const Matrix44& b);
 Matrix44& operator *=(Matrix44& m, float k);
 Matrix44& operator /=(Matrix44& m, float k);
 
-Matrix44 transpose(const Matrix44& m);
-float determinant(const Matrix44& m);
-Matrix44 inverse(const Matrix44& m);
-Matrix44 inverse(const Matrix44& m, float det);
-
 Matrix44 makeTransformMatrix(const Vector3& scale, const Quaternion& rot, const Vector3& trans);
 Matrix44 makeLookAtMatrix(const Vector3& eye, const Vector3& at, const Vector3& up);
 Matrix44 makePerspectiveMatrix(float fovY, float aspect, float zn, float zf); /// NOTE: aspect = X/Y
@@ -77,27 +75,29 @@ Matrix44 makeOrthoMatrix(float width, float height, float zn, float zf);
 Matrix44 makeOrthoMatrix(float left, float right, float bottom, float top, float zn, float zf);
 
 template <>
-inline Matrix44 to(const Quaternion& q)
+inline Matrix44 to(const Quaternion& q_)
 {
-    const auto unitQ = normalize(q);
-    const auto w2 = unitQ.w * 2;
-    const auto x2 = unitQ.x * 2;
-    const auto y2 = unitQ.y * 2;
-    const auto z2 = unitQ.z * 2;
+    auto q = q_;
+    q.normalize();
+
+    const auto w2 = q.w * 2;
+    const auto x2 = q.x * 2;
+    const auto y2 = q.y * 2;
+    const auto z2 = q.z * 2;
 
     auto m = Matrix44::IDENTITY;
 
-    m(0, 0) = 1 - y2 * unitQ.y - z2 * unitQ.z;
-    m(0, 1) = x2 * unitQ.y + w2 * unitQ.z;
-    m(0, 2) = x2 * unitQ.z - w2 * unitQ.y;
+    m(0, 0) = 1 - y2 * q.y - z2 * q.z;
+    m(0, 1) = x2 * q.y + w2 * q.z;
+    m(0, 2) = x2 * q.z - w2 * q.y;
 
-    m(1, 0) = x2 * unitQ.y - w2 * unitQ.z;
-    m(1, 1) = 1 - x2 * unitQ.x - z2 * unitQ.z;
-    m(1, 2) = y2 * unitQ.z + w2 * unitQ.x;
+    m(1, 0) = x2 * q.y - w2 * q.z;
+    m(1, 1) = 1 - x2 * q.x - z2 * q.z;
+    m(1, 2) = y2 * q.z + w2 * q.x;
 
-    m(2, 0) = x2 * unitQ.z + w2 * unitQ.y;
-    m(2, 1) = y2 * unitQ.z - w2 * unitQ.x;
-    m(2, 2) = 1 - x2 * unitQ.x - y2 * unitQ.y;
+    m(2, 0) = x2 * q.z + w2 * q.y;
+    m(2, 1) = y2 * q.z - w2 * q.x;
+    m(2, 2) = 1 - x2 * q.x - y2 * q.y;
 
     return m;
 }

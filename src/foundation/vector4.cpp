@@ -40,9 +40,30 @@ float& Vector4::operator [](size_t i)
     }
 }
 
+float Vector4::norm() const
+{
+    return std::sqrt(x * x + y * y + z * z + w * w);
+}
+
+float Vector4::dot(const Vector4& v) const
+{
+    return x * v.x + y * v.y + z * v.z + w * v.w;
+}
+
 Vector3 Vector4::xyz() const
 {
     return{ x, y, z };
+}
+
+void Vector4::normalize()
+{
+    check(!equalf(norm(), 0));
+    *this /= norm();
+}
+
+void Vector4::scale(const Vector4& k)
+{
+    *this = { x * k.x, y * k.y, z * k.z, w * k.w };
 }
 
 bool operator ==(const Vector4& a, const Vector4& b)
@@ -131,32 +152,6 @@ Vector4& operator /=(Vector4& v, float k)
     check(!equalf(k, 0));
     v = v / k;
     return v;
-}
-
-Vector4 scale(const Vector4& v, const Vector4& k)
-{
-    return{ v.x * k.x, v.y * k.y, v.z * k.z, v.w * k.w };
-}
-
-Vector4 invScale(const Vector4& v, const Vector4& k)
-{
-    return{ v.x / k.x, v.y / k.y, v.z / k.z, v.w / k.w };
-}
-
-float norm(const Vector4& v)
-{
-    return std::sqrt(v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w);
-}
-
-Vector4 normalize(const Vector4& v)
-{
-    check(!equalf(norm(v), 0));
-    return v / norm(v);
-}
-
-float dotProduct(const Vector4& a, const Vector4& b)
-{
-    return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
 }
 
 GF_NAMESPACE_END

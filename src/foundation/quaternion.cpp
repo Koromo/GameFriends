@@ -35,6 +35,58 @@ float& Quaternion::operator [](size_t i)
     }
 }
 
+Vector3 Quaternion::axis() const
+{
+    auto q = *this;
+    q.normalize();
+
+    const Vector3 v = { q.x, q.y, q.z };
+
+    if (v == Vector3::ZERO) // Rotate axis is not defined
+    {
+        return Vector3::UNIT_X;
+    }
+
+    const auto invSin = 1 / std::sin(q.angle() * 0.5f);
+    return v * invSin;
+}
+
+float Quaternion::angle() const
+{
+    auto q = *this;
+    q.normalize();
+    return std::acos(q.w) * 2;
+}
+
+float Quaternion::norm() const
+{
+    return std::sqrt(w * w + x * x + y * y + z * z);
+}
+
+Quaternion Quaternion::inverse() const
+{
+    check(!equalf(norm(), 0));
+    const auto mag = norm();
+    const auto conj = conjugate();
+    return conj * (1 / (mag * mag));
+}
+
+Quaternion Quaternion::conjugate() const
+{
+    return{ w, -x, -y, -z };
+}
+
+float Quaternion::dot(const Quaternion& q) const
+{
+    return w * q.w + x * q.x + y * q.y + z * q.z;
+}
+
+void Quaternion::normalize()
+{
+    check(!equalf(norm(), 0));
+    *this *= (1 / norm());
+}
+
 bool operator ==(const Quaternion& a, const Quaternion& b)
 {
     return equalf(a.w, b.w) && equalf(a.x, b.x) && equalf(a.y, b.y) && equalf(a.z, b.z);
@@ -103,62 +155,12 @@ Quaternion& operator *=(Quaternion& q, float k)
     return q;
 }
 
-float norm(const Quaternion& q)
-{
-    return std::sqrt(q.w * q.w + q.x * q.x + q.y * q.y + q.z * q.z);
-}
-
-Quaternion normalize(const Quaternion& q)
-{
-    check(!equalf(norm(q), 0));
-    return q * (1 / norm(q));
-}
-
-Quaternion conjugate(const Quaternion& q)
-{
-    return{ q.w, -q.x, -q.y, -q.z };
-}
-
-Quaternion inverse(const Quaternion& q)
-{
-    check(!equalf(norm(q), 0));
-    const auto mag = norm(q);
-    const auto conj = conjugate(q);
-    return conj * (1 / (mag * mag));
-}
-
-float dotProduct(const Quaternion& a, const Quaternion& b)
-{
-    return a.w * b.w + a.x * b.x + a.y * b.y + a.z * b.z;
-}
-
 Quaternion makeQuaternion(const Vector3& axis, float rad)
 {
-    const auto unitAxis = normalize(axis);
     const auto halfAngle = rad * 0.5f;
     const auto c = std::cos(halfAngle);
     const auto s = std::sin(halfAngle);
-    return{ c, unitAxis.x * s, unitAxis.y * s, unitAxis.z * s };
-}
-
-Vector3 axis(const Quaternion& q)
-{
-    const auto unitQ = normalize(q);
-    const Vector3 v = { unitQ.x, unitQ.y, unitQ.z };
-
-    if (v == Vector3::ZERO) // Rotate axis is not defined
-    {
-        return Vector3::UNIT_X;
-    }
-
-    const auto invSin = 1 / std::sin(angle(unitQ) * 0.5f);
-    return v * invSin;
-}
-
-float angle(const Quaternion& q)
-{
-    const auto unitQ = normalize(q);
-    return std::acos(unitQ.w) * 2;
+    return{ c, axis.x * s, axis.y * s, axis.z * s };
 }
 
 GF_NAMESPACE_END

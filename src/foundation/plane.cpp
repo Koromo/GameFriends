@@ -10,40 +10,39 @@ Plane::Plane(const Vector3& n_, float d_)
 {
 }
 
-Plane normalize(const Plane& p)
+float Plane::dotCoord(const Vector3& v) const
 {
-    const auto k = 1 / norm(p.n);
-    return{ p.n * k, p.d * k };
+    return n.dot(v) + d;
 }
 
-float dotCoord(const Plane& p, const Vector3& v)
+float Plane::dotNormal(const Vector3& v) const
 {
-    return dotProduct(p.n, v) + p.d;
+    return n.dot(v);
 }
 
-float dotNormal(const Plane& p, const Vector3& v)
+float Plane::intersects(const Vector3& origin, const Vector3& dir) const
 {
-    return dotProduct(p.n, v);
-}
-
-float intersects(const Plane& p, const Vector3& rayOrigin, const Vector3& rayDir)
-{
-    const auto unitRay = normalize(rayDir);
-    const auto cosTheta = dotNormal(p, unitRay);
+    const auto cosTheta = dotNormal(dir);
     if (equalf(cosTheta, 0)) // Parallel ray
     {
         return -INFINITY;
     }
-    return -dotCoord(p, rayOrigin) / cosTheta;
+    return -dotCoord(origin) / cosTheta;
+}
+
+void Plane::normalize()
+{
+    const auto k = 1 / n.norm();
+    *this = { n * k, d * k };
 }
 
 bool intersects(const Plane& p0, const Plane& p1, const Plane& p2, Vector3* at)
 {
     /// TODO: I dont understand yet
-    const auto n01 = crossProduct(p0.n, p1.n);
-    const auto n12 = crossProduct(p1.n, p2.n);
-    const auto n20 = crossProduct(p2.n, p0.n);
-    const auto cosTheta = dotProduct(p0.n, n12);
+    const auto n01 = p0.n.cross(p1.n);
+    const auto n12 = p1.n.cross(p2.n);
+    const auto n20 = p2.n.cross(p0.n);
+    const auto cosTheta = p0.n.dot(n12);
     if (equalf(cosTheta, 0))
     {
         return false;

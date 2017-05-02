@@ -150,7 +150,7 @@
     <ClInclude Include="..\src\foundation\vector4.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\foundation\axisaligneddox.cpp" />
+    <ClCompile Include="..\src\foundation\axisalignedbox.cpp" />
     <ClCompile Include="..\src\foundation\color.cpp" />
     <ClCompile Include="..\src\foundation\exception.cpp" />
     <ClCompile Include="..\src\foundation\frustum.cpp" />

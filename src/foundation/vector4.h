@@ -22,7 +22,12 @@ public:
     const float& operator [](size_t i) const;
     float& operator [](size_t i);
 
+    float norm() const;
+    float dot(const Vector4& v) const;
     Vector3 xyz() const;
+
+    void normalize();
+    void scale(const Vector4& k);
 
     static const Vector4 ZERO;
     static const Vector4 UNIT_X;
@@ -49,12 +54,6 @@ Vector4& operator -=(Vector4& a, const Vector4& b);
 Vector4& operator *=(Vector4& v, const Matrix44& m);
 Vector4& operator *=(Vector4& v, float k);
 Vector4& operator /=(Vector4& v, float k);
-
-Vector4 scale(const Vector4& v, const Vector4& k);
-//Vector4 invScale(const Vector4& v, const Vector4& k);
-float norm(const Vector4& v);
-Vector4 normalize(const Vector4& v);
-float dotProduct(const Vector4& a, const Vector4& b);
 
 GF_NAMESPACE_END
 

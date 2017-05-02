@@ -32,7 +32,7 @@ struct Frustum
     Vector3 corners[8];
 };
 
-Frustum makeFrustumFromMatrix(const Matrix44& m);
+Frustum makeFrustum(const Matrix44& m);
 
 GF_NAMESPACE_END
 

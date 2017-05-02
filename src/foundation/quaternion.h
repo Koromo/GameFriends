@@ -21,6 +21,15 @@ public:
     const float& operator [](size_t i) const;
     float& operator [](size_t i);
 
+    Vector3 axis() const;
+    float angle() const;
+    float norm() const;
+    Quaternion inverse() const;
+    Quaternion conjugate() const;
+    float dot(const Quaternion& q) const;
+
+    void normalize();
+
     static const Quaternion IDENTITY;
 };
 
@@ -40,15 +49,7 @@ Quaternion& operator -=(Quaternion& a, const Quaternion& b);
 Quaternion& operator *=(Quaternion& a, const Quaternion& b);
 Quaternion& operator *=(Quaternion& q, float k);
 
-float norm(const Quaternion& q);
-Quaternion normalize(const Quaternion& q);
-Quaternion conjugate(const Quaternion& q);
-Quaternion inverse(const Quaternion& q);
-float dotProduct(const Quaternion& a, const Quaternion& b);
-
-Quaternion makeQuaternion(const Vector3& axis, float rad);
-Vector3 axis(const Quaternion& q);
-float angle(const Quaternion& q);
+Quaternion makeQuaternion(const Vector3& axis, float rad); // NODE: Need unit axis
 
 GF_NAMESPACE_END
 
