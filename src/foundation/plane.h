@@ -24,7 +24,7 @@ struct Plane
     void normalize();
 };
 
-bool intersects(const Plane& p0, const Plane& p1, const Plane& p2, Vector3* at); /// TODO: IDK when non unit planes
+bool intersects(const Plane& p0, const Plane& p1, const Plane& p2, Vector3* at = nullptr); /// TODO: IDK when non unit planes
 
 GF_NAMESPACE_END
 
