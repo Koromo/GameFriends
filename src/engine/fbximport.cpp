@@ -5,7 +5,7 @@
 #include "../scene/texture.h"
 #include "../scene/mesh.h"
 #include "../engine/pixelformat.h"
-#include "../foundation/color.h"
+#include "foundation/color.h"
 #include <stack>
 #include <vector>
 #include <unordered_map>

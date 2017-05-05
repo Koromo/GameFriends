@@ -1,7 +1,7 @@
 #include "rootsignature.h"
 #include "rendersystem.h"
 #include "d3dsupport.h"
-#include "../foundation/math.h"
+#include "foundation/math.h"
 #include <array>
 #include <vector>
 

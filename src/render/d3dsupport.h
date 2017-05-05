@@ -1,8 +1,8 @@
 #ifndef GAMEFRIENDS_D3DSUPPORT_H
 #define GAMEFRIENDS_D3DSUPPORT_H
 
-#include "../foundation/exception.h"
-#include "../foundation/prerequest.h"
+#include "foundation/exception.h"
+#include "foundation/prerequest.h"
 #include "d3dx12.h"
 #include <d3d12.h>
 #include <string>

@@ -2,7 +2,7 @@
 #define GAMEFRIENDS_RIGIDBODY_H
 
 #include "bulletinc.h"
-#include "../foundation/prerequest.h"
+#include "foundation/prerequest.h"
 #include <LinearMath/btMotionState.h>
 #include <memory>
 

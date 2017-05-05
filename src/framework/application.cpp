@@ -8,9 +8,9 @@
 #include "../engine/resource.h"
 #include "../windowing/window.h"
 #include "../windowing/windowsinc.h"
-#include "../foundation/string.h"
-#include "../foundation/matrix44.h"
-#include "../foundation/math.h"
+#include "foundation/string.h"
+#include "foundation/matrix44.h"
+#include "foundation/math.h"
 
 GF_NAMESPACE_BEGIN
 

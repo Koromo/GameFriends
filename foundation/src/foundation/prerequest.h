@@ -1,7 +1,7 @@
 #ifndef GAMEFRIENDS_PREREQUEST_H
 #define GAMEFRIENDS_PREREQUEST_H
 
-#include <cstdint> /// TODO: Environment dependence ?
+#include <cstdint> /// TODO: Environment dependence
 
 #define _CRT_SECURE_NO_WARNINGS
 #define _CRT_NON_CONFORMING_SWPRINTFS

@@ -1,7 +1,7 @@
 #ifndef GAMEFRIENDS_RENDERSTATE_H
 #define GAMEFRIENDS_RENDERSTATE_H
 
-#include "../foundation/prerequest.h"
+#include "foundation/prerequest.h"
 
 GF_NAMESPACE_BEGIN
 

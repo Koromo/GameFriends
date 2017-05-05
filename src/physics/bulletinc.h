@@ -1,9 +1,9 @@
 #ifndef GAMEFRIENDS_BULLETINC_H
 #define GAMEFRIENDS_BULLETINC_H
 
-#include "../foundation/vector3.h"
-#include "../foundation/quaternion.h"
-#include "../foundation/prerequest.h"
+#include "foundation/vector3.h"
+#include "foundation/quaternion.h"
+#include "foundation/prerequest.h"
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
 #include <LinearMath/btVector3.h>

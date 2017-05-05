@@ -1,6 +1,6 @@
 #include "../audio/soundclip.h"
-#include "../foundation/exception.h"
-#include "../foundation/string.h"
+#include "foundation/exception.h"
+#include "foundation/string.h"
 
 GF_NAMESPACE_BEGIN
 

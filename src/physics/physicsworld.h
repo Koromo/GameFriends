@@ -2,7 +2,7 @@
 #define GAMEFRIENDS_PHYSICSWORLD_H
 
 #include "bulletinc.h"
-#include "../foundation/prerequest.h"
+#include "foundation/prerequest.h"
 #include <LinearMath/btIDebugDraw.h>
 #include <memory>
 #include <unordered_set>

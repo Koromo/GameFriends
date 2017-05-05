@@ -2,8 +2,8 @@
 #define GAMEFRIENDS_FBXIMPORT_H
 
 #include "../engine/resource.h"
-#include "../foundation/exception.h"
-#include "../foundation/prerequest.h"
+#include "foundation/exception.h"
+#include "foundation/prerequest.h"
 #define FBXSDK_NAMESPACE_USING 0
 #include <fbxsdk.h>
 #include <memory>

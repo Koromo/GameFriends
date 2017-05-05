@@ -1,5 +1,5 @@
 #include "window.h"
-#include "../foundation/exception.h"
+#include "foundation/exception.h"
 
 GF_NAMESPACE_BEGIN
 

@@ -3,7 +3,7 @@
 
 #include "audioinc.h"
 #include "../engine/resource.h"
-#include "../foundation/prerequest.h"
+#include "foundation/prerequest.h"
 #include <memory>
 #include <string>
 

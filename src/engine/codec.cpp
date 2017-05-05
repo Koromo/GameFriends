@@ -1,6 +1,6 @@
 #include "codec.h"
-#include "../foundation/exception.h"
-#include "../foundation/math.h"
+#include "foundation/exception.h"
+#include "foundation/math.h"
 #include <vector>
 #include <cstdio>
 

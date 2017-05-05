@@ -2,7 +2,7 @@
 #define GAMEFRIENDS_SOUNDVOICE_H
 
 #include "audioinc.h"
-#include "../foundation/prerequest.h"
+#include "foundation/prerequest.h"
 
 GF_NAMESPACE_BEGIN
 

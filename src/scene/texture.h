@@ -2,7 +2,7 @@
 #define GAMEFRIENDS_TEXTURE_H
 
 #include "../engine/resource.h"
-#include "../foundation/prerequest.h"
+#include "foundation/prerequest.h"
 #include <string>
 #include <memory>
 

@@ -4,10 +4,10 @@
 #include "../render/shaderprogram.h"
 #include "../render/drawcall.h"
 #include "../engine/resource.h"
-#include "../foundation/prerequest.h"
-#include "../foundation/sortedvector.h"
-#include "../foundation/exception.h"
-#include "../foundation/prerequest.h"
+#include "foundation/prerequest.h"
+#include "foundation/sortedvector.h"
+#include "foundation/exception.h"
+#include "foundation/prerequest.h"
 #include <string>
 #include <memory>
 #include <unordered_map>

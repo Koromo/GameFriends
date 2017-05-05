@@ -2,8 +2,8 @@
 #define GAMEFRIENDS_WINDOW_H
 
 #include "windowsinc.h"
-#include "../foundation/string.h"
-#include "../foundation/prerequest.h"
+#include "foundation/string.h"
+#include "foundation/prerequest.h"
 #include <memory>
 #include <type_traits>
 

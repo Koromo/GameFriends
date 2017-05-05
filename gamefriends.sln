@@ -7,8 +7,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "audio", "audio\audio.vcxpro
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "engine", "engine\engine.vcxproj", "{0846C4B1-740C-4724-B49C-47EAF9C214C0}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "foundation", "foundation\foundation.vcxproj", "{F373F062-A2C2-408C-B213-35F92AB6E06C}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "framework", "framework\framework.vcxproj", "{C9241ECB-D544-44CA-A935-00F5C049624A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "render", "render\render.vcxproj", "{683D1171-5746-4AE8-A18C-7F81F4DDCB69}"
@@ -48,14 +46,6 @@ Global
 		{0846C4B1-740C-4724-B49C-47EAF9C214C0}.Release|x64.Build.0 = Release|x64
 		{0846C4B1-740C-4724-B49C-47EAF9C214C0}.Release|x86.ActiveCfg = Release|Win32
 		{0846C4B1-740C-4724-B49C-47EAF9C214C0}.Release|x86.Build.0 = Release|Win32
-		{F373F062-A2C2-408C-B213-35F92AB6E06C}.Debug|x64.ActiveCfg = Debug|x64
-		{F373F062-A2C2-408C-B213-35F92AB6E06C}.Debug|x64.Build.0 = Debug|x64
-		{F373F062-A2C2-408C-B213-35F92AB6E06C}.Debug|x86.ActiveCfg = Debug|Win32
-		{F373F062-A2C2-408C-B213-35F92AB6E06C}.Debug|x86.Build.0 = Debug|Win32
-		{F373F062-A2C2-408C-B213-35F92AB6E06C}.Release|x64.ActiveCfg = Release|x64
-		{F373F062-A2C2-408C-B213-35F92AB6E06C}.Release|x64.Build.0 = Release|x64
-		{F373F062-A2C2-408C-B213-35F92AB6E06C}.Release|x86.ActiveCfg = Release|Win32
-		{F373F062-A2C2-408C-B213-35F92AB6E06C}.Release|x86.Build.0 = Release|Win32
 		{C9241ECB-D544-44CA-A935-00F5C049624A}.Debug|x64.ActiveCfg = Debug|x64
 		{C9241ECB-D544-44CA-A935-00F5C049624A}.Debug|x64.Build.0 = Debug|x64
 		{C9241ECB-D544-44CA-A935-00F5C049624A}.Debug|x86.ActiveCfg = Debug|Win32
