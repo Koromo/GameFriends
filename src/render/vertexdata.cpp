@@ -2,7 +2,7 @@
 #include "linearallocator.h"
 #include "rendersystem.h"
 #include "d3dsupport.h"
-#include "../foundation/exception.h"
+#include "foundation/exception.h"
 #include <algorithm>
 #include <cstring>
 

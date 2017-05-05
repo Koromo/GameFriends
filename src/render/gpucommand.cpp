@@ -4,8 +4,8 @@
 #include "drawcall.h"
 #include "pixelbuffer.h"
 #include "d3dsupport.h"
-#include "../foundation/color.h"
-#include "../foundation/exception.h"
+#include "foundation/color.h"
+#include "foundation/exception.h"
 
 GF_NAMESPACE_BEGIN
 

@@ -2,7 +2,7 @@
 #define GAMEFRIENDS_MESH_H
 
 #include "../engine/resource.h"
-#include "../foundation/prerequest.h"
+#include "foundation/prerequest.h"
 #include <vector>
 #include <memory>
 #include <string>

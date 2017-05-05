@@ -6,7 +6,7 @@
 
 #include "../engine/pixelformat.h"
 
-#include "../foundation/color.h"
+#include "foundation/color.h"
 
 GF_NAMESPACE_BEGIN
 

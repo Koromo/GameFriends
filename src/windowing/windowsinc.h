@@ -1,8 +1,8 @@
 #ifndef GAMEFRIENDS_WINDOWSINC_H
 #define GAMEFRIENDS_WINDOWSINC_H
 
-#include "../foundation/exception.h"
-#include "../foundation/prerequest.h"
+#include "foundation/exception.h"
+#include "foundation/prerequest.h"
 #include <Windows.h>
 #include <windowsx.h>
 #include <string>

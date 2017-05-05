@@ -3,7 +3,7 @@
 
 #include "../engine/pixelformat.h"
 #include "../windowing/windowsinc.h"
-#include "../foundation/prerequest.h"
+#include "foundation/prerequest.h"
 #include <d3d12.h>
 
 GF_NAMESPACE_BEGIN

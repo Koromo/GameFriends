@@ -1,5 +1,5 @@
 #include "collisionshape.h"
-#include "../foundation/vector3.h"
+#include "foundation/vector3.h"
 #include <LinearMath/btVector3.h>
 
 GF_NAMESPACE_BEGIN

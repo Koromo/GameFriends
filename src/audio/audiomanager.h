@@ -2,9 +2,9 @@
 #define GAMEFRIENDS_AUDIOMANAGER_H
 
 #include "audioinc.h"
-#include "../foundation/vector3.h"
-#include "../foundation/quaternion.h"
-#include "../foundation/prerequest.h"
+#include "foundation/vector3.h"
+#include "foundation/quaternion.h"
+#include "foundation/prerequest.h"
 #include <memory>
 #include <array>
 

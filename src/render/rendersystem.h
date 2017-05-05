@@ -8,7 +8,7 @@
 #include "pipeline.h"
 #include "rootsignature.h"
 #include "../windowing/windowsinc.h"
-#include "../foundation/prerequest.h"
+#include "foundation/prerequest.h"
 #include <dxgi1_4.h>
 #include <d3d12.h>
 #include <memory>

@@ -2,7 +2,7 @@
 #include "material.h"
 #include "scene.h"
 #include "../engine/fbximport.h"
-#include "../foundation/exception.h"
+#include "foundation/exception.h"
 #include <algorithm>
 
 GF_NAMESPACE_BEGIN

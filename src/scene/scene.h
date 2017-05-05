@@ -4,9 +4,9 @@
 #include "../render/gpucommand.h"
 #include "../render/renderstate.h"
 #include "../engine/resource.h"
-#include "../foundation/sortedvector.h"
-#include "../foundation/matrix44.h"
-#include "../foundation/prerequest.h"
+#include "foundation/sortedvector.h"
+#include "foundation/matrix44.h"
+#include "foundation/prerequest.h"
 #include <memory>
 #include <vector>
 

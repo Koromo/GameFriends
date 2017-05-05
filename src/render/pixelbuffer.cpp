@@ -3,7 +3,7 @@
 #include "descriptorheap.h"
 #include "linearallocator.h"
 #include "d3dsupport.h"
-#include "../foundation/exception.h"
+#include "foundation/exception.h"
 
 GF_NAMESPACE_BEGIN
 

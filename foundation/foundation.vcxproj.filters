@@ -2,98 +2,101 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="src">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\foundation\color.h">
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\foundation\any.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\foundation\string.h">
+    <ClInclude Include="src\foundation\axisalignedbox.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\foundation\utility.h">
+    <ClInclude Include="src\foundation\color.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\foundation\prerequest.h">
+    <ClInclude Include="src\foundation\exception.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\foundation\any.h">
+    <ClInclude Include="src\foundation\frustum.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\foundation\traits.h">
+    <ClInclude Include="src\foundation\math.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\foundation\axisalignedbox.h">
+    <ClInclude Include="src\foundation\matrix44.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\foundation\exception.h">
+    <ClInclude Include="src\foundation\plane.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\foundation\frustum.h">
+    <ClInclude Include="src\foundation\prerequest.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\foundation\math.h">
+    <ClInclude Include="src\foundation\quaternion.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\foundation\matrix44.h">
+    <ClInclude Include="src\foundation\sortedvector.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\foundation\plane.h">
+    <ClInclude Include="src\foundation\string.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\foundation\quaternion.h">
+    <ClInclude Include="src\foundation\traits.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\foundation\vector2.h">
+    <ClInclude Include="src\foundation\utility.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\foundation\vector3.h">
+    <ClInclude Include="src\foundation\vector2.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\foundation\vector4.h">
+    <ClInclude Include="src\foundation\vector3.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\foundation\sortedvector.h">
+    <ClInclude Include="src\foundation\vector4.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\foundation\color.cpp">
+    <ClCompile Include="src\foundation\axisalignedbox.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\foundation\string.cpp">
+    <ClCompile Include="src\foundation\color.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\foundation\exception.cpp">
+    <ClCompile Include="src\foundation\exception.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\foundation\frustum.cpp">
+    <ClCompile Include="src\foundation\frustum.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\foundation\math.cpp">
+    <ClCompile Include="src\foundation\math.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\foundation\matrix44.cpp">
+    <ClCompile Include="src\foundation\matrix44.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\foundation\plane.cpp">
+    <ClCompile Include="src\foundation\plane.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\foundation\quaternion.cpp">
+    <ClCompile Include="src\foundation\quaternion.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\foundation\vector2.cpp">
+    <ClCompile Include="src\foundation\string.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\foundation\vector3.cpp">
+    <ClCompile Include="src\foundation\vector2.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\foundation\vector4.cpp">
+    <ClCompile Include="src\foundation\vector3.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\foundation\axisalignedbox.cpp">
+    <ClCompile Include="src\foundation\vector4.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

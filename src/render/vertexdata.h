@@ -3,8 +3,8 @@
 
 #include "../windowing/windowsinc.h"
 #include "../engine/pixelformat.h"
-#include "../foundation/sortedvector.h"
-#include "../foundation/prerequest.h"
+#include "foundation/sortedvector.h"
+#include "foundation/prerequest.h"
 #include <d3d12.h>
 #include <string>
 #include <vector>

@@ -1,5 +1,5 @@
 #include "physicsworld.h"
-#include "../foundation/color.h"
+#include "foundation/color.h"
 #include "rigidbody.h"
 #include <unordered_map>
 

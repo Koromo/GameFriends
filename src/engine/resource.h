@@ -1,8 +1,8 @@
 #ifndef GAMEFRIENDS_RESOURCE_H
 #define GAMEFRIENDS_RESOURCE_H
 
-#include "../foundation/exception.h"
-#include "../foundation/prerequest.h"
+#include "foundation/exception.h"
+#include "foundation/prerequest.h"
 #include <string>
 #include <memory>
 #include <unordered_map>

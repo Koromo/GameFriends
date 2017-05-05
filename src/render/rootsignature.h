@@ -2,7 +2,7 @@
 #define GAMEFRIENDS_ROOTSIGNATURE_H
 
 #include "../windowing/windowsinc.h"
-#include "../foundation/prerequest.h"
+#include "foundation/prerequest.h"
 #include <d3d12.h>
 #include <unordered_map>
 

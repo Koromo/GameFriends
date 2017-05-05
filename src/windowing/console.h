@@ -2,8 +2,8 @@
 #define GAMEFRIENDS_CONSOLE_H
 
 #include "windowsinc.h"
-#include "../foundation/string.h"
-#include "../foundation/prerequest.h"
+#include "foundation/string.h"
+#include "foundation/prerequest.h"
 
 GF_NAMESPACE_BEGIN
 

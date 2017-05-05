@@ -2,7 +2,7 @@
 #define GAMEFRIENDS_GPUCOMMAND_H
 
 #include "../windowing/windowsinc.h"
-#include "../foundation/prerequest.h"
+#include "foundation/prerequest.h"
 #include <d3d12.h>
 #include <type_traits>
 #include <memory>

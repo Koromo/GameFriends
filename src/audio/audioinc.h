@@ -5,8 +5,8 @@
 
 #include "../windowing/windowsinc.h" // inc
 
-#include "../foundation/exception.h"
-#include "../foundation/prerequest.h"
+#include "foundation/exception.h"
+#include "foundation/prerequest.h"
 
 #include <xaudio2.h> // inc
 #include <x3daudio.h> //inc

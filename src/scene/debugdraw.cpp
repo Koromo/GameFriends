@@ -6,7 +6,7 @@
 #include "../render/gpucommand.h"
 #include "../render/drawcall.h"
 #include "../engine/pixelformat.h"
-#include "../foundation/matrix44.h"
+#include "foundation/matrix44.h"
 
 GF_NAMESPACE_BEGIN
 

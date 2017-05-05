@@ -5,9 +5,9 @@
 #include "rootsignature.h"
 #include "../engine/resource.h"
 #include "../windowing/windowsinc.h"
-#include "../foundation/sortedvector.h"
-#include "../foundation/exception.h"
-#include "../foundation/prerequest.h"
+#include "foundation/sortedvector.h"
+#include "foundation/exception.h"
+#include "foundation/prerequest.h"
 #include <d3d12.h>
 #include <d3dcompiler.h>
 #include <memory>

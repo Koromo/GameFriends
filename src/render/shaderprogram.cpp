@@ -3,8 +3,8 @@
 #include "pixelbuffer.h"
 #include "rendersystem.h"
 #include "d3dsupport.h"
-#include "../foundation/string.h"
-#include "../foundation/math.h"
+#include "foundation/string.h"
+#include "foundation/math.h"
 
 GF_NAMESPACE_BEGIN
 

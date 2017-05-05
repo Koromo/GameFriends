@@ -2,9 +2,9 @@
 #define GAMEFRIENDS_DEBUGDRAW_H
 
 #include "../engine/resource.h"
-#include "../foundation/color.h"
-#include "../foundation/vector3.h"
-#include "../foundation/prerequest.h"
+#include "foundation/color.h"
+#include "foundation/vector3.h"
+#include "foundation/prerequest.h"
 #include <vector>
 #include <memory>
 

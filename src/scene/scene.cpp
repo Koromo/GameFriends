@@ -4,8 +4,8 @@
 #include "../engine/pixelformat.h"
 #include "../render/rendersystem.h"
 #include "../render/pixelbuffer.h"
-#include "../foundation/math.h"
-#include "../foundation/color.h"
+#include "foundation/math.h"
+#include "foundation/color.h"
 #include <queue>
 
 GF_NAMESPACE_BEGIN

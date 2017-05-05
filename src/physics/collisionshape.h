@@ -2,7 +2,7 @@
 #define GAMEFRIENDS_COLLISIONSHAPE_H
 
 #include "bulletinc.h"
-#include "../foundation/prerequest.h"
+#include "foundation/prerequest.h"
 #include <memory>
 
 GF_NAMESPACE_BEGIN

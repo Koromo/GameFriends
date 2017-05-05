@@ -1,8 +1,8 @@
 #include "linearallocator.h"
 #include "rendersystem.h"
 #include "d3dsupport.h"
-#include "../foundation/math.h"
-#include "../foundation/exception.h"
+#include "foundation/math.h"
+#include "foundation/exception.h"
 
 GF_NAMESPACE_BEGIN
 

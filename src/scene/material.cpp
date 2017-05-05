@@ -1,8 +1,8 @@
 #include "material.h"
 #include "texture.h"
-#include "../foundation/matrix44.h"
-#include "../foundation/color.h"
-#include "../foundation/vector4.h"
+#include "foundation/matrix44.h"
+#include "foundation/color.h"
+#include "foundation/vector4.h"
 #include <algorithm>
 #include <cstring>
 

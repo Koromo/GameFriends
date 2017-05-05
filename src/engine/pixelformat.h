@@ -1,7 +1,7 @@
 #ifndef GAMEFRIENDS_PIXELFORMAT_H
 #define GAMEFRIENDS_PIXELFORMAT_H
 
-#include "../foundation/prerequest.h"
+#include "foundation/prerequest.h"
 
 GF_NAMESPACE_BEGIN
 

@@ -4,7 +4,7 @@
 #include "physicsdebug.h"
 #include "../physics/physicsworld.h"
 #include "../scene/scene.h"
-#include "../foundation/prerequest.h"
+#include "foundation/prerequest.h"
 #include <string>
 #include <memory>
 #include <chrono>

@@ -2,7 +2,7 @@
 #define GAMEFRIENDS_INPUT_H
 
 #include "../windowing/windowsinc.h"
-#include "../foundation/prerequest.h"
+#include "foundation/prerequest.h"
 #include <array>
 #include <vector>
 

@@ -2,8 +2,8 @@
 #define GAMEFRIENDS_CODEC_H
 
 #include "pixelformat.h"
-#include "../foundation/exception.h"
-#include "../foundation/prerequest.h"
+#include "foundation/exception.h"
+#include "foundation/prerequest.h"
 #include <memory>
 #include <string>
 #include <vector>
