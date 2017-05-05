@@ -22,6 +22,12 @@
     <ClCompile Include="..\src\scene\debugdraw.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\scene\shademodel.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scene\materialparameter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\scene\material.h">
@@ -37,6 +43,12 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\src\scene\debugdraw.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\scene\shademodel.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\scene\materialparameter.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

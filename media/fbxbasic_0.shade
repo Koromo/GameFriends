@@ -1,0 +1,13 @@
+@_Header
+Auther:
+Comment:
+
+@Parameters
+0: float4 diffuse
+
+@VS
+Compile: media/fbxbasic.hlsl vsMain
+
+@PS
+Compile: media/fbxbasic.hlsl psMain_0
+Map0: diffuse diffuse

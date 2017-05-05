@@ -49,12 +49,9 @@ void DebugDraw::drawDebugs(const RenderCamera& camera)
     graphics.drawableState(*vertex_);
 
     material_->setFloat4x4("ViewProj", (camera.view * camera.proj).transpose());
-
-    auto& pass = material_->passNth(0);
-    auto drawCall = pass.drawCallBase();
+    auto drawCall = material_->drawCallSource();
     drawCall.setRenderTarget(backBuffer);
     drawCall.setVertex(*vertex_, 0, positions_.size(), 0, 1);
-    drawCall.setViewport(camera.viewport);
     drawCall.setViewport(camera.viewport);
     graphics.triggerDrawCall(drawCall);
 

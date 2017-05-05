@@ -1,28 +1,7 @@
-Parameters {
-    float4 ambient;
-    float4 diffuse;
-    float4 emissive;
-    float4 specular;
-    float power;
-}
+@_Header
+Auther:
+Comment:
 
-Shaders {
-    Ref vs {
-	path = media/fbxbasic.hlsl;
-	entry = vsMain;
-        map(_World, world);
-        map(_View, view);
-        map(_Proj, proj);
-    }
-
-    Ref ps {
-	path = media/fbxbasic.hlsl;
-	entry = psMain_0;
-        map(diffuse, diffuse);
-    }
-}
-
-Pass 0 {
-    vertexShader = vs;
-    pixelShader = ps;
-}
+@Shade
+Path: media/fbxbasic_0.shade
+diffuse: 0 0.5 0.5 1

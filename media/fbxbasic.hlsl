@@ -8,11 +8,11 @@ struct VSOut
     float4 pos : SV_POSITION;
 };
 
-cbuffer Mats : register(b0)
+cbuffer Constants : register(b0)
 {
-    matrix world;
-    matrix view;
-    matrix proj;
+    matrix _World;
+    matrix _View;
+    matrix _Proj;
 }
 
 cbuffer Color : register(b0)
@@ -23,9 +23,9 @@ cbuffer Color : register(b0)
 VSOut vsMain(VSIn In)
 {
     VSOut Out;
-    Out.pos = mul(In.pos, world);
-    Out.pos = mul(Out.pos, view);
-    Out.pos = mul(Out.pos, proj);
+    Out.pos = mul(In.pos, _World);
+    Out.pos = mul(Out.pos, _View);
+    Out.pos = mul(Out.pos, _Proj);
     return Out;
 }
 

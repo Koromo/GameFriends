@@ -458,8 +458,8 @@ namespace
 
                 auto material = resourceTable.template obtain<Material>(materialPath);
                 material->load();
-                material = material->duplicate();
 
+                /*
                 material->setFloat4("ambient", materialCache.ambient.color);
                 material->setFloat4("diffuse", materialCache.diffuse.color);
                 material->setFloat4("emissive", materialCache.emissive.color);
@@ -470,6 +470,7 @@ namespace
                 if (textureFlags & TEX_DIFFUSE) setTexture(materialCache.diffuse, "diffuseTexture", material);
                 if (textureFlags & TEX_EMISSIVE) setTexture(materialCache.emissive, "emissiveTexture", material);
                 if (textureFlags & TEX_SPECULAR) setTexture(materialCache.specular, "specularTexture", material);
+                */
 
                 Surface surface;
                 surface.vertices = vertexData;

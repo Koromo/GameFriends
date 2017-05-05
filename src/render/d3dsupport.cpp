@@ -124,7 +124,7 @@ D3D12_CULL_MODE D3DMappings::CULL_MODE(CullingFace f)
 D3D12_DEPTH_STENCIL_DESC D3DMappings::DEPTH_STENCIL_DESC(const DepthState& ds)
 {
     D3D12_DEPTH_STENCIL_DESC d = CD3DX12_DEPTH_STENCIL_DESC(CD3DX12_DEFAULT());
-    d.DepthEnable = ds.depthTest;
+    d.DepthEnable = ds.depthEnable;
     d.DepthFunc = D3DMappings::COMPARISON_FUNC(ds.depthFun);
     return d;
 }

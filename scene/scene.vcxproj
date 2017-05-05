@@ -148,15 +148,19 @@
   <ItemGroup>
     <ClCompile Include="..\src\scene\debugdraw.cpp" />
     <ClCompile Include="..\src\scene\material.cpp" />
+    <ClCompile Include="..\src\scene\materialparameter.cpp" />
     <ClCompile Include="..\src\scene\mesh.cpp" />
     <ClCompile Include="..\src\scene\scene.cpp" />
+    <ClCompile Include="..\src\scene\shademodel.cpp" />
     <ClCompile Include="..\src\scene\texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\scene\debugdraw.h" />
     <ClInclude Include="..\src\scene\material.h" />
+    <ClInclude Include="..\src\scene\materialparameter.h" />
     <ClInclude Include="..\src\scene\mesh.h" />
     <ClInclude Include="..\src\scene\scene.h" />
+    <ClInclude Include="..\src\scene\shademodel.h" />
     <ClInclude Include="..\src\scene\texture.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
