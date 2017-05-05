@@ -1,0 +1,20 @@
+# This is comment
+
+# .metaprop file tokenizes by space character.
+# You can use the symbol " that encloses words for avoid tokenization. (Except new lines)
+# The word _Header and symbol @,: are special notaion, therefore you can not use them arbitary.
+# Property is described as array, each element needs space prefix for tokenization.
+
+# You must describe header as follows
+@_Header
+Auther: SugarHeart	# Array {SugarHeart}
+Comment: "Who are you"	# Array {Who are you}. The size of array is 1.
+
+# Property groups is described as @<name> 
+@Usami
+
+# Properties is described as "\ <value>"
+Age: 17 27	# Array {17, 27} size is 2.
+JK:		# Empty denotes zero array {}.
+BeMy: ""	# It is empty string, therefore array is {""} with size 1
+Baby: "" Hello "" World ! ""		# Array {"", Hello, "", World, !, ""} size 6
