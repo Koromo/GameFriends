@@ -46,7 +46,7 @@ private:
     size_t priority_;
     OptimizedDrawCall drawCallBase_;
     std::shared_ptr<const ShaderProgram> program_;
-    std::shared_ptr<ShaderBindings> bindings_;
+    std::shared_ptr<ShaderParameters> params_;
 
     struct NumericMapping
     {
@@ -63,7 +63,7 @@ private:
 
 public:
     OptimizedDrawCall drawCallBase() const;
-    const ShaderBindings& shaderBindings() const;
+    const ShaderParameters& shaderBindings() const;
 
     void updateNumeric(const std::string& name, const void* data, size_t size);
     void updateTexture(const std::string& name, PixelBuffer& tex);

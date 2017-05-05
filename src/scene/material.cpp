@@ -44,9 +44,9 @@ OptimizedDrawCall Pass::drawCallBase() const
     return drawCallBase_;
 }
 
-const ShaderBindings& Pass::shaderBindings() const
+const ShaderParameters& Pass::shaderBindings() const
 {
-    return *bindings_;
+    return *params_;
 }
 
 void Pass::updateNumeric(const std::string& name, const void* data, size_t size)
@@ -55,7 +55,7 @@ void Pass::updateNumeric(const std::string& name, const void* data, size_t size)
     while (range.first != range.second)
     {
         const auto mapping = range.first->second;
-        bindings_->updateConstant(mapping.toType, mapping.toName, data, size);
+        params_->updateConstant(mapping.toType, mapping.toName, data, size);
         ++range.first;
     }
 }
@@ -66,7 +66,7 @@ void Pass::updateTexture(const std::string& name, PixelBuffer& tex)
     while (range.first != range.second)
     {
         const auto mapping = range.first->second;
-        bindings_->updateShaderResource(mapping.toType, mapping.toName, tex);
+        params_->updateShaderResource(mapping.toType, mapping.toName, tex);
         ++range.first;
     }
 }
@@ -79,12 +79,17 @@ void Pass::setPriority(size_t i)
 void Pass::setDrawCallBase(const OptimizedDrawCall& base)
 {
     drawCallBase_ = base;
+    if (params_)
+    {
+        drawCallBase_.setShaderParameters(*params_);
+    }
 }
 
 void Pass::setShaderProgram(const std::shared_ptr<const ShaderProgram>& program)
 {
     program_ = program;
-    bindings_ = program->createBindings();
+    params_ = program->createParameters();
+    drawCallBase_.setShaderParameters(*params_);
 }
 
 void Pass::mapNumeric(const std::string& name, ShaderType toType, const std::string& toName)
@@ -109,9 +114,10 @@ std::shared_ptr<Pass> Pass::duplicateWithNewBindings() const
     newPass->priority_ = priority_;
     newPass->drawCallBase_ = drawCallBase_;
     newPass->program_ = program_;
-    newPass->bindings_ = program_->createBindings();
+    newPass->params_ = program_->createParameters();
     newPass->numericMappings_ = numericMappings_;
     newPass->textureMappings_ = textureMappings_;
+    newPass->drawCallBase_.setShaderParameters(*newPass->params_);
     return newPass;
 }
 

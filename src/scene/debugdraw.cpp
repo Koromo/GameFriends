@@ -52,14 +52,10 @@ void DebugDraw::drawDebugs(const RenderCamera& camera)
 
     auto& pass = material_->passNth(0);
     auto drawCall = pass.drawCallBase();
-    const auto& bindings = pass.shaderBindings();
-
     drawCall.setRenderTarget(backBuffer);
     drawCall.setVertex(*vertex_, 0, positions_.size(), 0, 1);
-
-    graphics.prepareDrawCall(drawCall);
-    graphics.setViewport(camera.viewport);
-    graphics.setShaderBindings(bindings);
+    drawCall.setViewport(camera.viewport);
+    drawCall.setViewport(camera.viewport);
     graphics.triggerDrawCall(drawCall);
 
     positions_.clear();

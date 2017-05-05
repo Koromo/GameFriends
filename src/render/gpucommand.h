@@ -12,10 +12,8 @@ GF_NAMESPACE_BEGIN
 struct Color;
 class PixelBuffer;
 class VertexData;
-class ShaderBindings;
 class OptimizedDrawCall;
 struct PixelUpload;
-struct Viewport;
 enum class PixelBufferState;
 
 using FenceValue = unsigned long long;
@@ -55,10 +53,6 @@ public:
     void clearRenderTarget(PixelBuffer& rt, const Color& clearColor);
     void clearDepthTarget(PixelBuffer& ds, float depth);
 
-    void setViewport(const Viewport& vp);
-    void setShaderBindings(const ShaderBindings& bindings);
-
-    void prepareDrawCall(const OptimizedDrawCall& drawCall);
     void triggerDrawCall(const OptimizedDrawCall& drawCall);
 
     void transition(PixelBuffer& resource, PixelBufferState befor, PixelBufferState after);

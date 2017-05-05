@@ -67,37 +67,6 @@ void GpuCommandBuilder::clearDepthTarget(PixelBuffer& ds, float depth)
     hasCommands_ = true;
 }
 
-void GpuCommandBuilder::setViewport(const Viewport& vp)
-{
-    const auto sr = CD3DX12_RECT(vp.left, vp.top, vp.left + vp.width, vp.top + vp.height);
-    list_->RSSetViewports(1, &D3DMappings::VIEWPORT(vp));
-    list_->RSSetScissorRects(1, &sr);
-}
-
-void GpuCommandBuilder::setShaderBindings(const ShaderBindings& bindings)
-{
-    const auto descriptorHeaps = bindings.usedDescriptorHeaps();
-    const auto rootParams = bindings.rootParameters();
-
-    const auto numDescriptorHeaps = descriptorHeaps.second - descriptorHeaps.first;
-    const auto descriptorHeapHead = &(*descriptorHeaps.first);
-    list_->SetDescriptorHeaps(numDescriptorHeaps, descriptorHeapHead);
-
-    const auto numRootParameters = rootParams.second - rootParams.first;
-    auto rootParam = rootParams.first;
-    for (int i = 0; i < numRootParameters; ++i)
-    {
-        list_->SetGraphicsRootDescriptorTable(i, *rootParam);
-        ++rootParam;
-    }
-}
-
-void GpuCommandBuilder::prepareDrawCall(const OptimizedDrawCall& drawCall)
-{
-    drawCall.prepare(*list_);
-    hasCommands_ = true;
-}
-
 void GpuCommandBuilder::triggerDrawCall(const OptimizedDrawCall& drawCall)
 {
     drawCall.trigger(*list_);

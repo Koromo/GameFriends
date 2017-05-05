@@ -69,16 +69,11 @@ void RenderWorld::draw(const RenderCamera& camera)
                 pass.updateNumeric(AutoParameter::VIEW, &view_T, sizeof(Matrix44));
                 pass.updateNumeric(AutoParameter::PROJ, &proj_T, sizeof(Matrix44));
 
-                auto& bindings = pass.shaderBindings();
                 auto drawCall = pass.drawCallBase();
-
+                drawCall.setViewport(camera.viewport);
                 drawCall.setRenderTarget(backBuffer);
                 drawCall.setDepthTarget(depthTarget);
                 drawCall.setVertexIndexed(*surface.vertices, 0, surface.indexOffset, surface.indexCount, 0, 1);
-
-                graphics.prepareDrawCall(drawCall);
-                graphics.setShaderBindings(bindings);
-                graphics.setViewport(camera.viewport);
                 graphics.triggerDrawCall(drawCall);
             }
         }

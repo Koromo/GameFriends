@@ -35,7 +35,7 @@ namespace
     }
 }
 
-ShaderBindings::ShaderBindings(ID3D12ShaderReflection* vs, ID3D12ShaderReflection* gs, ID3D12ShaderReflection* ps,
+ShaderParameters::ShaderParameters(ID3D12ShaderReflection* vs, ID3D12ShaderReflection* gs, ID3D12ShaderReflection* ps,
     const EachShaderSignature& signatures)
     : bindingMap_()
 {
@@ -99,7 +99,7 @@ ShaderBindings::ShaderBindings(ID3D12ShaderReflection* vs, ID3D12ShaderReflectio
     }
 }
 
-void ShaderBindings::updateConstant(ShaderType type, const std::string& name, const void* data, size_t size)
+void ShaderParameters::updateConstant(ShaderType type, const std::string& name, const void* data, size_t size)
 {
     const auto found = bindingMap_[index(type)].var.find(name);
     if (found != std::cend(bindingMap_[index(type)].var))
@@ -109,7 +109,7 @@ void ShaderBindings::updateConstant(ShaderType type, const std::string& name, co
     }
 }
 
-void ShaderBindings::updateShaderResource(ShaderType type, const std::string& name, PixelBuffer& resource)
+void ShaderParameters::updateShaderResource(ShaderType type, const std::string& name, PixelBuffer& resource)
 {
     const auto found = bindingMap_[index(type)].sr.find(name);
     if (found != std::cend(bindingMap_[index(type)].sr))
@@ -120,7 +120,7 @@ void ShaderBindings::updateShaderResource(ShaderType type, const std::string& na
     }
 }
 
-void ShaderBindings::createBindingMap(ID3D12ShaderReflection* shader, const ShaderSignature& sig,
+void ShaderParameters::createBindingMap(ID3D12ShaderReflection* shader, const ShaderSignature& sig,
     Descriptor bufferHeap, Descriptor samplerHeap, BindingMap& out)
 {
     out.cbuf.clear();
@@ -325,9 +325,9 @@ void ShaderProgram::compile(ShaderType type, const std::string& path, const std:
     }
 }
 
-std::shared_ptr<ShaderBindings> ShaderProgram::createBindings() const
+std::shared_ptr<ShaderParameters> ShaderProgram::createParameters() const
 {
-    return std::make_shared<ShaderBindings>(
+    return std::make_shared<ShaderParameters>(
         shaders_[0].useable() ? shaders_[0]->reflection.get() : nullptr,
         shaders_[1].useable() ? shaders_[1]->reflection.get() : nullptr,
         shaders_[2].useable() ? shaders_[2]->reflection.get() : nullptr,

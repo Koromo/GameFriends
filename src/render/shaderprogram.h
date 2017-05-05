@@ -35,7 +35,7 @@ public:
         : Exception(msg) {}
 };
 
-class ShaderBindings
+class ShaderParameters
 {
 private:
     struct ConstantBuffer
@@ -67,7 +67,7 @@ private:
     std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> rootParameters_;
 
 public:
-    ShaderBindings(ID3D12ShaderReflection* vs, ID3D12ShaderReflection* gs, ID3D12ShaderReflection* ps,
+    ShaderParameters(ID3D12ShaderReflection* vs, ID3D12ShaderReflection* gs, ID3D12ShaderReflection* ps,
         const EachShaderSignature& signatures);
 
     void updateConstant(ShaderType type, const std::string& name, const void* data, size_t size);
@@ -132,7 +132,7 @@ public:
 
     void compile(ShaderType type, const std::string& path, const std::string& entry,
         std::initializer_list<ShaderMacro>& macros = std::initializer_list<ShaderMacro>());
-    std::shared_ptr<ShaderBindings> createBindings() const;
+    std::shared_ptr<ShaderParameters> createParameters() const;
 
     ResourceInterface<const HLSLShader> shaderStage(ShaderType type) const;
     ID3D12RootSignature& rootSignature() const;
