@@ -2,6 +2,7 @@
 #define GAMEFRIENDS_TEXTURE_H
 
 #include "../engine/resource.h"
+#include "../engine/filesystem.h"
 #include "foundation/prerequest.h"
 #include <string>
 #include <memory>
@@ -18,7 +19,7 @@ private:
     std::unique_ptr<PixelBuffer> resource_;
 
 public:
-    explicit MediaTexture(const std::string& path);
+    explicit MediaTexture(const FilePath& path);
     PixelBuffer& resource();
 
 private:

@@ -4,8 +4,8 @@
 #include "../scene/scene.h"
 #include "../scene/debugdraw.h"
 #include "../render/rendersystem.h"
-#include "../engine/fbximport.h"
 #include "../engine/resource.h"
+#include "../engine/filesystem.h"
 #include "../windowing/window.h"
 #include "../windowing/windowsinc.h"
 #include "foundation/string.h"
@@ -55,7 +55,7 @@ void Application::go()
     }
 
     // Resource
-    //fbxImport.startup();
+    fileSystem.startup("media");
 
     // Audio
     audioManager.startup();
@@ -152,8 +152,8 @@ void Application::go()
     audioManager.shutdown();
 
     // Resource
-    //fbxImport.shutdown();
     resourceTable.clear();
+    fileSystem.shutdown();
 
     window.reset();
 }

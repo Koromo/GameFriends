@@ -5,6 +5,7 @@
 #include "../render/shaderprogram.h"
 #include "../render/drawcall.h"
 #include "../engine/resource.h"
+#include "../engine/filesystem.h"
 #include "foundation/prerequest.h"
 #include <memory>
 #include <vector>
@@ -55,7 +56,7 @@ private:
     std::vector<std::pair<std::string, MatParamType>> params_;
 
 public:
-    explicit ShadeModel(const std::string& path);
+    explicit ShadeModel(const FilePath& path);
 
     std::shared_ptr<ShadeModelInput> createInput() const;
 

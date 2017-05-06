@@ -1,4 +1,5 @@
 #include "codec.h"
+#include "filesystem.h"
 #include "foundation/exception.h"
 #include "foundation/math.h"
 #include <vector>
@@ -85,8 +86,9 @@ namespace
     }
 }
 
-std::shared_ptr<Image> decodeBmp(const std::string& path)
+std::shared_ptr<Image> decodeBmp(const std::string& path_)
 {
+    const auto path = fileSystem.toOSPath(path_);
     auto file = enforce<FileException>(std::fopen(path.c_str(), "rb"), "Failed to open file (" + path + ").");
     GF_SCOPE_EXIT{ fclose(file); };
 

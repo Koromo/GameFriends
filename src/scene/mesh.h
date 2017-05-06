@@ -2,6 +2,7 @@
 #define GAMEFRIENDS_MESH_H
 
 #include "../engine/resource.h"
+#include "../engine/filesystem.h"
 #include "foundation/sortedvector.h"
 #include "foundation/prerequest.h"
 #include <vector>
@@ -38,7 +39,7 @@ private:
     SortedVector<SubMesh, SubMeshComp> subMeshes_;
 
 public:
-    explicit Mesh(const std::string& path);
+    explicit Mesh(const FilePath& path);
 
     void setVertexData(const std::shared_ptr<VertexData>& vertexData);
     void addSubMesh(const SubMesh& sm);

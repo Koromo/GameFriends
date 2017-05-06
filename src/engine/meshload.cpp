@@ -2,8 +2,8 @@
 #include "../scene/material.h"
 #include "../scene/scene.h"
 #include "../render/vertexdata.h"
-#include "../engine/pixelformat.h"
-#include "../engine/resource.h"
+#include "pixelformat.h"
+#include "resource.h"
 #include "foundation/metaprop.h"
 
 GF_NAMESPACE_BEGIN
@@ -50,7 +50,7 @@ namespace
 void Mesh::loadImpl()
 {
     MetaPropFile file;
-    file.read(path());
+    file.read(path().os);
 
     vertexData_ = std::make_shared<VertexData>();
     std::vector<float> floats;

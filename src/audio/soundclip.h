@@ -3,6 +3,7 @@
 
 #include "audioinc.h"
 #include "../engine/resource.h"
+#include "../engine/filesystem.h"
 #include "foundation/prerequest.h"
 #include <memory>
 #include <string>
@@ -17,7 +18,7 @@ private:
     SoundFormat format_;
 
 public:
-    SoundClip(const std::string& path);
+    SoundClip(const FilePath& path);
     const unsigned char* data() const;
     size_t size() const;
     const SoundFormat& format() const;

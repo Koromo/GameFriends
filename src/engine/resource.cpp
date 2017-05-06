@@ -2,13 +2,13 @@
 
 GF_NAMESPACE_BEGIN
 
-Resource::Resource(const std::string& path)
+Resource::Resource(const FilePath& path)
     : path_(path)
     , ready_(false)
 {
 }
 
-std::string Resource::path() const
+FilePath Resource::path() const
 {
     return path_;
 }
@@ -36,8 +36,9 @@ void Resource::unload()
     }
 }
 
-void ResourceTable::destroy(const std::string& path)
+void ResourceTable::destroy(const std::string& path_)
 {
+    const auto path = fileSystem.path(path_);
     const auto it = resourceMap_.find(path);
     if (it != std::cend(resourceMap_))
     {
@@ -50,7 +51,9 @@ void ResourceTable::clear()
 {
     while (!resourceMap_.empty())
     {
-        destroy(std::cbegin(resourceMap_)->first);
+        const auto i = std::cbegin(resourceMap_);
+        i->second->unload();
+        resourceMap_.erase(i);
     }
 }
 

@@ -4,6 +4,7 @@
 #include "descriptorheap.h"
 #include "rootsignature.h"
 #include "../engine/resource.h"
+#include "../engine/filesystem.h"
 #include "../windowing/windowsinc.h"
 #include "foundation/sortedvector.h"
 #include "foundation/exception.h"
@@ -15,6 +16,7 @@
 #include <array>
 #include <initializer_list>
 #include <utility>
+#include <unordered_map>
 #include <cstring>
 
 GF_NAMESPACE_BEGIN
@@ -97,7 +99,7 @@ struct ShaderMacro
 class HLSLShader : public Resource
 {
 public:
-    std::string file;
+    FilePath file;
     std::string model;
     std::string entry;
 
@@ -114,7 +116,7 @@ public:
     D3D12_SHADER_BYTECODE byteCode;
     ComPtr<ID3D12ShaderReflection> reflection;
 
-    HLSLShader(const std::string& id);
+    HLSLShader(const FilePath& id);
 
 private:
     void loadImpl();

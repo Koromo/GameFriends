@@ -54,7 +54,8 @@ public:
 class FileException : public Exception
 {
 public:
-    explicit FileException(const std::string& msg);
+    explicit FileException(const std::string& msg)
+        : Exception(msg) {}
 };
 
 GF_NAMESPACE_END

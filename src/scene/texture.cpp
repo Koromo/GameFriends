@@ -6,7 +6,7 @@
 
 GF_NAMESPACE_BEGIN
 
-MediaTexture::MediaTexture(const std::string& path)
+MediaTexture::MediaTexture(const FilePath& path)
     : Resource(path)
     , image_()
     , resource_()
@@ -20,7 +20,7 @@ PixelBuffer& MediaTexture::resource()
 
 void MediaTexture::loadImpl()
 {
-    image_ = decodeBmp(path());
+    image_ = decodeBmp(path().os);
 
     PixelBufferSetup setup = {};
     setup.width = image_->width();

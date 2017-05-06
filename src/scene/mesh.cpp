@@ -1,13 +1,12 @@
 #include "mesh.h"
 #include "material.h"
 #include "scene.h"
-#include "../engine/fbximport.h"
 #include "foundation/exception.h"
 #include <algorithm>
 
 GF_NAMESPACE_BEGIN
 
-Mesh::Mesh(const std::string& path)
+Mesh::Mesh(const FilePath& path)
     : Resource(path)
     , vertexData_()
     , subMeshes_()

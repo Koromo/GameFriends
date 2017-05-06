@@ -146,6 +146,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\engine\filesystem.cpp" />
     <ClCompile Include="..\src\engine\meshload.cpp" />
     <ClCompile Include="..\src\engine\pixelformat.cpp" />
     <ClCompile Include="..\src\engine\soundclipload.cpp" />
@@ -155,6 +156,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\engine\codec.h" />
+    <ClInclude Include="..\src\engine\filesystem.h" />
     <ClInclude Include="..\src\engine\pixelformat.h" />
     <ClInclude Include="..\src\engine\resource.h" />
   </ItemGroup>

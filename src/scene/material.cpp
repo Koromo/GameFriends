@@ -7,7 +7,7 @@
 
 GF_NAMESPACE_BEGIN
 
-Material::Material(const std::string& path)
+Material::Material(const FilePath& path)
     : Resource(path)
     , params_()
     , shadeModelIn_()

@@ -3,7 +3,7 @@
 #include "../scene/materialparameter.h"
 #include "../scene/texture.h"
 #include "../render/renderstate.h"
-#include "../engine/resource.h"
+#include "resource.h"
 #include "foundation/metaprop.h"
 #include "foundation/exception.h"
 #include <string>
@@ -27,7 +27,7 @@ namespace
 void ShadeModel::loadImpl()
 {
     MetaPropFile file;
-    file.read(path());
+    file.read(path().os);
 
     std::unordered_map<std::string, MatParamType> paramTypes;
 
@@ -137,7 +137,7 @@ void ShadeModel::unloadImpl()
 void Material::loadImpl()
 {
     MetaPropFile file;
-    file.read(path());
+    file.read(path().os);
 
     // @Shade
     const auto& Shade = file.group("Shade");

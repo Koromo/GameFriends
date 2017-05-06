@@ -40,7 +40,7 @@
 #include "windowing/windowsinc.h"
 
 #include "engine/codec.h"
-#include "engine/fbximport.h"
+#include "engine/filesystem.h"
 #include "engine/pixelformat.h"
 #include "engine/resource.h"
 
@@ -56,6 +56,7 @@
 #include "../foundation/src/foundation/vector3.h"
 #include "../foundation/src/foundation/vector4.h"
 #include "../foundation/src/foundation/math.h"
+#include "../foundation/src/foundation/metaprop.h"
 #include "../foundation/src/foundation/string.h"
 #include "../foundation/src/foundation/traits.h"
 #include "../foundation/src/foundation/utility.h"

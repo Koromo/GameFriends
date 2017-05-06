@@ -5,6 +5,7 @@
 #include "../render/shaderprogram.h"
 #include "../render/drawcall.h"
 #include "../engine/resource.h"
+#include "../engine/filesystem.h"
 #include "foundation/prerequest.h"
 
 GF_NAMESPACE_BEGIN
@@ -30,7 +31,7 @@ private:
     ResourceInterface<const ShadeModel> shadeModel_;
 
 public:
-    explicit Material(const std::string& path);
+    explicit Material(const FilePath& path);
 
     void setFloat(const std::string& name, float f);
     void setFloat(const std::string& name, double f);

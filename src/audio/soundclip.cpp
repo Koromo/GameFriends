@@ -2,7 +2,7 @@
 
 GF_NAMESPACE_BEGIN
 
-SoundClip::SoundClip(const std::string& path)
+SoundClip::SoundClip(const FilePath& path)
     : Resource(path)
     , data_()
     , size_(0)

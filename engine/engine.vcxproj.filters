@@ -25,6 +25,9 @@
     <ClCompile Include="..\src\engine\meshload.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\engine\filesystem.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\engine\codec.h">
@@ -34,6 +37,9 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\src\engine\pixelformat.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\filesystem.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

@@ -6,11 +6,11 @@ GF_NAMESPACE_BEGIN
 
 void SoundClip::loadImpl()
 {
-    const auto tpath = charset(path());
+    const auto tpath = charset(path().os);
 
     const auto mmio = enforce<FileException>(
         mmioOpen(const_cast<TCHAR*>(tpath.c_str()), nullptr, MMIO_READ),
-        "File not found (" + path() + ")."
+        "File not found (" + path().os + ")."
         );
     GF_SCOPE_EXIT{ mmioClose(mmio, 0); };
 

@@ -1,9 +1,9 @@
 #ifndef GAMEFRIENDS_RESOURCE_H
 #define GAMEFRIENDS_RESOURCE_H
 
+#include "filesystem.h"
 #include "foundation/exception.h"
 #include "foundation/prerequest.h"
-#include <string>
 #include <memory>
 #include <unordered_map>
 #include <utility>
@@ -13,14 +13,14 @@ GF_NAMESPACE_BEGIN
 class Resource
 {
 private:
-    std::string path_;
+    FilePath path_;
     bool ready_;
 
 public:
-    explicit Resource(const std::string& path);
+    explicit Resource(const FilePath& path);
     virtual ~Resource() = default;
 
-    std::string path() const;
+    FilePath path() const;
     bool ready() const;
     void load();
     void unload();
@@ -127,12 +127,13 @@ public:
 class ResourceTable
 {
 private:
-    std::unordered_map<std::string, std::shared_ptr<Resource>> resourceMap_;
+    std::unordered_map<FilePath, std::shared_ptr<Resource>> resourceMap_;
 
 public:
     template <class T, class... Args>
-    ResourceInterface<T> create(const std::string& path, Args&&... args)
+    ResourceInterface<T> create(const std::string& path_, Args&&... args)
     {
+        const auto path = fileSystem.path(path_);
         const auto it = resourceMap_.find(path);
         if (it != std::cend(resourceMap_))
         {
@@ -145,8 +146,9 @@ public:
     }
 
     template <class T>
-    ResourceInterface<T> get(const std::string& path)
+    ResourceInterface<T> get(const std::string& path_)
     {
+        const auto path = fileSystem.path(path_);
         const auto it = resourceMap_.find(path);
         if (it == std::cend(resourceMap_))
         {
@@ -156,12 +158,15 @@ public:
     }
 
     template <class T, class... Args>
-    ResourceInterface<T> obtain(const std::string& path, Args&&... args)
+    ResourceInterface<T> obtain(const std::string& path_, Args&&... args)
     {
-        const auto p = get<T>(path);
+        const auto path = fileSystem.path(path_);
+        const auto p = get<T>(path.os);
         if (!p)
         {
-            return create<T>(path, std::forward<Args>(args)...);
+            const auto r = std::make_shared<T>(path, std::forward<Args>(args)...);
+            resourceMap_.emplace(path, r);
+            return ResourceInterface<T>::create(r);
         }
         return p;
     }
