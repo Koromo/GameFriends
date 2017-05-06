@@ -26,6 +26,6 @@ DepthEnable: 1	# boolean (1)
 DepthFun: 2		# 0:never 1:equal 2:notEqual 3:less 4:lessEqual 5:greater 6:greaterEqual 7:always (3)
 
 @Rasterizer
-Fill = 1	# 0:wireframe 1:solid (1)
-Cull = 2	# 0:none 1:front 2:back (2)    
-DepthClip = 1;	# boolean (true)
+Fill: = 1	# 0:wireframe 1:solid (1)
+Cull: = 2	# 0:none 1:front 2:back (2)    
+DepthClip: = 1;	# boolean (true)

@@ -9,37 +9,39 @@ GF_NAMESPACE_BEGIN
 
 Mesh::Mesh(const std::string& path)
     : Resource(path)
-    , surfaces_()
+    , vertexData_()
+    , subMeshes_()
 {
 }
 
-size_t Mesh::addSurface(const Surface& s)
+void Mesh::setVertexData(const std::shared_ptr<VertexData>& vertexData)
 {
-    surfaces_.emplace_back(s);
-    return surfaces_.size();
+    vertexData_ = vertexData;
 }
 
-Surface& Mesh::surface(size_t id)
+void Mesh::addSubMesh(const SubMesh& sm)
 {
-    check(id < surfaces_.size());
-    return surfaces_[id];
-}
-
-void Mesh::loadImpl()
-{
-    fbxImport.importMesh(path(), *this);
-    auto& copy = sceneAppContext.copyCommandBuilder();
-    auto& graphics = sceneAppContext.graphicsCommandBuilder();
-    for (auto& s : surfaces_)
+    const auto r = std::equal_range(std::begin(subMeshes_), std::end(subMeshes_), sm, subMeshes_.comp());
+    if (r.first == r.second)
     {
-        copy.uploadVertices(*s.vertices);
-        graphics.drawableState(*s.vertices);
+        subMeshes_.insert(sm);
+    }
+    else
+    {
+        *r.first = sm;
     }
 }
 
-void Mesh::unloadImpl()
+SubMesh& Mesh::subMesh(const std::string& name)
 {
-    surfaces_.clear();
+    const auto it = std::lower_bound(std::begin(subMeshes_), std::end(subMeshes_), SubMesh{ name }, subMeshes_.comp());
+    check(it != std::end(subMeshes_) && it->name == name);
+    return *it;
+}
+
+std::shared_ptr<VertexData> Mesh::vertexData()
+{
+    return vertexData_;
 }
 
 GF_NAMESPACE_END

@@ -55,7 +55,7 @@ void Application::go()
     }
 
     // Resource
-    fbxImport.startup();
+    //fbxImport.startup();
 
     // Audio
     audioManager.startup();
@@ -65,7 +65,7 @@ void Application::go()
 
     // Scene
     sceneAppContext.startup();
-    //debugDraw.startup();
+    debugDraw.startup();
 
     const auto aspect = static_cast<float>(setup_.clientWidth) / setup_.clientHeight;
     renderCamera.view = Matrix44::IDENTITY;
@@ -119,7 +119,7 @@ void Application::go()
             tick(dt_s);
             physicsWorld.stepSimulation(dt_s);
             renderWorld.draw(renderCamera);
-            //debugDraw.drawDebugs(renderCamera);
+            debugDraw.drawDebugs(renderCamera);
 
             sceneAppContext.executeCommandsAndPresent();
             inputDevice.nextFrame();
@@ -142,7 +142,7 @@ void Application::go()
 
     // Scene
     renderWorld.clearEntities();
-    //debugDraw.shutdown();
+    debugDraw.shutdown();
     sceneAppContext.shutdown();
 
     // Render
@@ -152,7 +152,7 @@ void Application::go()
     audioManager.shutdown();
 
     // Resource
-    fbxImport.shutdown();
+    //fbxImport.shutdown();
     resourceTable.clear();
 
     window.reset();

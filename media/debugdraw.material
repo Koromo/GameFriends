@@ -1,21 +1,7 @@
-Parameters {
-    float4x4 ViewProj;
-}
+@_Header
+Auther:
+Comment:
 
-Shaders {
-    Ref vs {
-	path = media/debugdraw.hlsl;
-	entry = vsMain;
-        map(ViewProj, viewProj);
-    }
-    Ref ps {
-	path = media/debugdraw.hlsl;
-	entry = psMain;
-    }
-}
-
-Pass 0 {
-    vertexShader = vs;
-    pixelShader = ps;
-    depthTest = false;
-}
+@Shade
+Path: media/debugdraw.shade
+ViewProj: 

@@ -2,6 +2,7 @@
 #define GAMEFRIENDS_MESH_H
 
 #include "../engine/resource.h"
+#include "foundation/sortedvector.h"
 #include "foundation/prerequest.h"
 #include <vector>
 #include <memory>
@@ -13,30 +14,43 @@ GF_NAMESPACE_BEGIN
 class VertexData;
 class Material;
 
-struct Surface
+struct SubMesh
 {
-    std::shared_ptr<VertexData> vertices;
-    size_t indexOffset;
-    size_t indexCount;
-
+    std::string name;
+    bool indexed;
+    size_t offset;
+    size_t count;
     ResourceInterface<Material> material;
 };
 
 class Mesh : public Resource
 {
 private:
-    std::vector<Surface> surfaces_;
+    std::shared_ptr<VertexData> vertexData_;
+    
+    struct SubMeshComp
+    {
+        bool operator()(const SubMesh& a, const SubMesh& b)
+        {
+            return a.name < b.name;
+        }
+    };
+    SortedVector<SubMesh, SubMeshComp> subMeshes_;
 
 public:
     explicit Mesh(const std::string& path);
 
-    size_t addSurface(const Surface& s);
-    Surface& surface(size_t id);
+    void setVertexData(const std::shared_ptr<VertexData>& vertexData);
+    void addSubMesh(const SubMesh& sm);
 
-    auto surfaces() const
-        -> decltype(std::make_pair(std::cbegin(surfaces_), std::cend(surfaces_)))
+    SubMesh& subMesh(const std::string& name);
+
+    std::shared_ptr<VertexData> vertexData();
+
+    auto subMeshes()
+        -> decltype(std::make_pair(std::cbegin(subMeshes_), std::cend(subMeshes_)))
     {
-        return std::make_pair(std::cbegin(surfaces_), std::cend(surfaces_));
+        return std::make_pair(std::cbegin(subMeshes_), std::cend(subMeshes_));
     }
 
 private:

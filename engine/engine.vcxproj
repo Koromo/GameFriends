@@ -146,16 +146,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\engine\meshload.cpp" />
     <ClCompile Include="..\src\engine\pixelformat.cpp" />
     <ClCompile Include="..\src\engine\soundclipload.cpp" />
     <ClCompile Include="..\src\engine\codec.cpp" />
-    <ClCompile Include="..\src\engine\fbximport.cpp" />
     <ClCompile Include="..\src\engine\materialload.cpp" />
     <ClCompile Include="..\src\engine\resource.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\engine\codec.h" />
-    <ClInclude Include="..\src\engine\fbximport.h" />
     <ClInclude Include="..\src\engine\pixelformat.h" />
     <ClInclude Include="..\src\engine\resource.h" />
   </ItemGroup>

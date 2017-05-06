@@ -172,16 +172,9 @@ void MetaPropFile::read(const std::string& path)
             prop.setName(propName.substr(0, propName.length() - 1));
 
             const auto n = tokens.size() - 1;
-            if (n == 0)
+            for (size_t i = 0; i < n; ++i)
             {
-                prop[0] == "";
-            }
-            else
-            {
-                for (size_t i = 0; i < n; ++i)
-                {
-                    prop[i] = tokens[i + 1];
-                }
+                prop[i] = tokens[i + 1];
             }
 
             currentGroup.addProp(prop);

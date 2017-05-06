@@ -179,7 +179,7 @@ void Material::loadImpl()
             if (isFloating(type))
             {
                 const auto propSize = prop.size();
-                check(sizeof(float) * propSize == sizeofMatParam(type));
+                check(sizeof(float) * propSize <= sizeofMatParam(type));
                 const auto floats = reinterpret_cast<float*>(holder.numeric.get());
                 for (size_t n = 0; n < propSize; ++n)
                 {

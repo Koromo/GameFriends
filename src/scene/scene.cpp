@@ -54,23 +54,34 @@ void RenderWorld::draw(const RenderCamera& camera)
             continue;
         }
 
+        const auto vertexData = mesh->vertexData();
         const auto world_T = entity->worldMatrix.transpose();
-        for (auto surfaces = mesh->surfaces(); surfaces.first != surfaces.second; ++surfaces.first)
+        for (auto subMeshes = mesh->subMeshes(); subMeshes.first != subMeshes.second; ++subMeshes.first)
         {
-            auto& surface = *surfaces.first;
-            if (!surface.vertices || !surface.material.useable())
+            auto& subMesh = *subMeshes.first;
+            if (!subMesh.material.useable())
             {
                 continue;
             }
 
-            surface.material->directNumeric(ShaderType::vertex, SystemMatParam::WORLD, &world_T, sizeof(Matrix44));
-            surface.material->directNumeric(ShaderType::vertex, SystemMatParam::VIEW, &view_T, sizeof(Matrix44));
-            surface.material->directNumeric(ShaderType::vertex, SystemMatParam::PROJ, &proj_T, sizeof(Matrix44));
-            auto drawCall = surface.material->drawCallSource();
+            subMesh.material->directNumeric(ShaderType::vertex, SystemMatParam::WORLD, &world_T, sizeof(Matrix44));
+            subMesh.material->directNumeric(ShaderType::vertex, SystemMatParam::VIEW, &view_T, sizeof(Matrix44));
+            subMesh.material->directNumeric(ShaderType::vertex, SystemMatParam::PROJ, &proj_T, sizeof(Matrix44));
+
+            auto drawCall = subMesh.material->drawCallSource();
             drawCall.setViewport(camera.viewport);
             drawCall.setRenderTarget(backBuffer);
             drawCall.setDepthTarget(depthTarget);
-            drawCall.setVertexIndexed(*surface.vertices, 0, surface.indexOffset, surface.indexCount, 0, 1);
+
+            if (subMesh.indexed)
+            {
+                drawCall.setVertexIndexed(*vertexData, 0, subMesh.offset, subMesh.count, 0, 1);
+            }
+            else
+            {
+                drawCall.setVertex(*vertexData, subMesh.offset, subMesh.count, 0, 1);
+            }
+
             graphics.triggerDrawCall(drawCall);
         }
     }

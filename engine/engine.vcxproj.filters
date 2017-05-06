@@ -7,9 +7,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\engine\fbximport.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\engine\materialload.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -25,12 +22,12 @@
     <ClCompile Include="..\src\engine\pixelformat.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\engine\meshload.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\engine\codec.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\engine\fbximport.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\src\engine\resource.h">

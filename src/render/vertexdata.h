@@ -22,10 +22,10 @@ struct Semantics
 
 enum class PrimitiveTopology
 {
-    lines,
-    lineStrip,
-    triangles,
-    triangleStrip
+    lines = 0,
+    lineStrip = 1,
+    triangles = 2,
+    triangleStrip = 3
 };
 
 class VertexData

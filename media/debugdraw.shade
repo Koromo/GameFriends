@@ -1,0 +1,19 @@
+@_Header
+Auther:
+Comment:
+
+@Parameters
+0: float4x4 ViewProj
+
+@VS
+Compile: media/debugdraw.hlsl vsMain
+Map0: ViewProj viewProj
+
+@PS
+Compile: media/debugdraw.hlsl psMain
+
+@DepthStencil
+DepthEnable: 0
+
+@Rasterizer
+Fill: 0
