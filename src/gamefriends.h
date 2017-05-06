@@ -14,6 +14,7 @@
 #include "scene/material.h"
 #include "scene/mesh.h"
 #include "scene/scene.h"
+#include "scene/shademodel.h"
 #include "scene/texture.h"
 
 #include "render/descriptorheap.h"
