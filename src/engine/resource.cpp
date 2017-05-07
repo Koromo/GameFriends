@@ -36,9 +36,8 @@ void Resource::unload()
     }
 }
 
-void ResourceTable::destroy(const std::string& path_)
+void ResourceTable::destroy(const FilePath& path)
 {
-    const auto path = fileSystem.path(path_);
     const auto it = resourceMap_.find(path);
     if (it != std::cend(resourceMap_))
     {
@@ -47,13 +46,16 @@ void ResourceTable::destroy(const std::string& path_)
     }
 }
 
+void ResourceTable::destroy(const std::string& path)
+{
+    destroy(fileSystem.path(path));
+}
+
 void ResourceTable::clear()
 {
     while (!resourceMap_.empty())
     {
-        const auto i = std::cbegin(resourceMap_);
-        i->second->unload();
-        resourceMap_.erase(i);
+        destroy(std::cbegin(resourceMap_)->first);
     }
 }
 

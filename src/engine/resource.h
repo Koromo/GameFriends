@@ -131,9 +131,8 @@ private:
 
 public:
     template <class T, class... Args>
-    ResourceInterface<T> create(const std::string& path_, Args&&... args)
+    ResourceInterface<T> create(const FilePath& path, Args&&... args)
     {
-        const auto path = fileSystem.path(path_);
         const auto it = resourceMap_.find(path);
         if (it != std::cend(resourceMap_))
         {
@@ -145,10 +144,15 @@ public:
         return ResourceInterface<T>::create(r);
     }
 
-    template <class T>
-    ResourceInterface<T> get(const std::string& path_)
+    template <class T, class... Args>
+    ResourceInterface<T> create(const std::string& path, Args&&... args)
     {
-        const auto path = fileSystem.path(path_);
+        return create<T>(fileSystem.path(path), std::forward<Args>(args)...);
+    }
+
+    template <class T>
+    ResourceInterface<T> get(const FilePath& path)
+    {
         const auto it = resourceMap_.find(path);
         if (it == std::cend(resourceMap_))
         {
@@ -157,20 +161,30 @@ public:
         return ResourceInterface<T>::create(std::dynamic_pointer_cast<T>(it->second));
     }
 
-    template <class T, class... Args>
-    ResourceInterface<T> obtain(const std::string& path_, Args&&... args)
+    template <class T>
+    ResourceInterface<T> get(const std::string& path)
     {
-        const auto path = fileSystem.path(path_);
+        return get<T>(fileSystem.path(path));
+    }
+
+    template <class T, class... Args>
+    ResourceInterface<T> obtain(const FilePath& path, Args&&... args)
+    {
         const auto p = get<T>(path.os);
         if (!p)
         {
-            const auto r = std::make_shared<T>(path, std::forward<Args>(args)...);
-            resourceMap_.emplace(path, r);
-            return ResourceInterface<T>::create(r);
+            return create<T>(path, std::forward<Args>(args)...);
         }
         return p;
     }
 
+    template <class T, class... Args>
+    ResourceInterface<T> obtain(const std::string& path, Args&&... args)
+    {
+        return obtain<T>(fileSystem.path(path), std::forward<Args>(args)...);
+    }
+
+    void destroy(const FilePath& path);
     void destroy(const std::string& path);
     void clear();
 };
