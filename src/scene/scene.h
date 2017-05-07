@@ -6,6 +6,7 @@
 #include "../engine/resource.h"
 #include "foundation/sortedvector.h"
 #include "foundation/matrix44.h"
+#include "foundation/exception.h"
 #include "foundation/prerequest.h"
 #include <memory>
 #include <vector>
@@ -59,7 +60,7 @@ private:
     std::unique_ptr<PixelBuffer> depthTarget_;
 
 public:
-    void startup();
+    void startup() noexcept(false);
     void shutdown();
 
     GpuCommandBuilder& graphicsCommandBuilder();
@@ -73,6 +74,12 @@ public:
 
 extern SceneAppContext sceneAppContext;
 
+class SceneError : public Error
+{
+public:
+    explicit SceneError(const std::string& msg)
+        : Error(msg) {}
+};
 
 GF_NAMESPACE_END
 

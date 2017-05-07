@@ -56,7 +56,7 @@ private:
     std::array<float, MAX_CHANNELS_PER_VOICE * 2> levelMatrixMemory_;
 
 public:
-    void startup();
+    void startup() noexcept(false);
     void shutdown();
 
     AudioDeviceDetails deviceDetails() const;

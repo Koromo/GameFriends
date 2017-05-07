@@ -1,10 +1,18 @@
 #ifndef GAMEFRIENDS_FILESYSTEM_H
 #define GAMEFRIENDS_FILESYSTEM_H
 
+#include "foundation/exception.h"
 #include "foundation/prerequest.h"
 #include <string>
 
 GF_NAMESPACE_BEGIN
+
+class FileSystemError : public Error
+{
+public:
+    explicit FileSystemError(const std::string& msg)
+        : Error(msg) {}
+};
 
 struct FilePath
 {
@@ -25,7 +33,7 @@ private:
     std::string osRootPath_;
 
 public:
-    void startup(const std::string& rootDirectory);
+    void startup(const std::string& rootDirectory) noexcept(false);
     void shutdown();
 
     bool isOSPath(const std::string& path) const;

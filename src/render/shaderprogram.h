@@ -3,11 +3,11 @@
 
 #include "descriptorheap.h"
 #include "rootsignature.h"
+#include "d3dsupport.h"
 #include "../engine/resource.h"
 #include "../engine/filesystem.h"
 #include "../windowing/windowsinc.h"
 #include "foundation/sortedvector.h"
-#include "foundation/exception.h"
 #include "foundation/prerequest.h"
 #include <d3d12.h>
 #include <d3dcompiler.h>
@@ -30,11 +30,11 @@ enum class ShaderType
     pixel = 2
 };
 
-class ShaderCompileError : public Exception
+class ShaderCompileError : public Direct3DError
 {
 public:
     explicit ShaderCompileError(const std::string& msg)
-        : Exception(msg) {}
+        : Direct3DError(msg) {}
 };
 
 class ShaderParameters
@@ -96,12 +96,17 @@ struct ShaderMacro
     std::string value;
 };
 
+struct CompiledShader
+{
+    D3D12_SHADER_BYTECODE code;
+    ID3D12ShaderReflection* reflect;
+};
+
 class HLSLShader : public Resource
 {
-public:
-    FilePath file;
-    std::string model;
-    std::string entry;
+private:
+    std::string model_;
+    std::string entry_;
 
     struct MacroComp
     {
@@ -110,23 +115,32 @@ public:
             return a.name < b.name;
         }
     };
-    std::vector<ShaderMacro> macros; /// TODO: SortedVector
+    std::vector<ShaderMacro> macros_; /// TODO: SortedVector
 
-    ComPtr<ID3DBlob> code;
-    D3D12_SHADER_BYTECODE byteCode;
-    ComPtr<ID3D12ShaderReflection> reflection;
+    struct ShaderHold
+    {
+        ComPtr<ID3DBlob> code;
+        ComPtr<ID3D12ShaderReflection> ref;
+    };
+    std::unordered_map<std::string, ShaderHold> compiledShaders_;
 
-    HLSLShader(const FilePath& id);
+public:
+    HLSLShader(const FilePath& path);
+
+    void setModel(const std::string& model);
+    void setEntry(const std::string& entry);
+    void setMacros(std::initializer_list<ShaderMacro>& macros);
+    CompiledShader compile();
 
 private:
-    void loadImpl();
+    bool loadImpl();
     void unloadImpl();
 };
 
 class ShaderProgram
 {
 private:
-    std::array<ResourceInterface<HLSLShader>, 3> shaders_;
+    std::array<CompiledShader, 3> shaders_;
     EachShaderSignature signatures_;
 
 public:
@@ -136,7 +150,7 @@ public:
         std::initializer_list<ShaderMacro>& macros = std::initializer_list<ShaderMacro>());
     std::shared_ptr<ShaderParameters> createParameters() const;
 
-    ResourceInterface<const HLSLShader> shaderStage(ShaderType type) const;
+    D3D12_SHADER_BYTECODE shaderStage(ShaderType type) const;
     ID3D12RootSignature& rootSignature() const;
 
 private:

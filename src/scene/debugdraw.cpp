@@ -17,8 +17,16 @@ namespace
 
 void DebugDraw::startup()
 {
-    material_ = resourceTable.template obtain<Material>(DEBUG_MATERIAL);
+    material_ = resourceManager.template obtain<Material>(DEBUG_MATERIAL);
     material_->load();
+
+    if (!material_->ready())
+    {
+        /// LOG
+        throw SceneError("DebugDraw initialization failed.");
+    }
+
+    /// LOG
 }
 
 void DebugDraw::shutdown()
@@ -27,6 +35,7 @@ void DebugDraw::shutdown()
     positions_.clear();
     colors_.clear();
     vertex_.reset();
+    /// LOG
 }
 
 void DebugDraw::drawDebugs(const RenderCamera& camera)
@@ -49,10 +58,12 @@ void DebugDraw::drawDebugs(const RenderCamera& camera)
     graphics.drawableState(*vertex_);
 
     material_->setFloat4x4("ViewProj", (camera.view * camera.proj).transpose());
+
     auto drawCall = material_->drawCallSource();
     drawCall.setRenderTarget(backBuffer);
     drawCall.setVertex(*vertex_, 0, positions_.size(), 0, 1);
     drawCall.setViewport(camera.viewport);
+
     graphics.triggerDrawCall(drawCall);
 
     positions_.clear();

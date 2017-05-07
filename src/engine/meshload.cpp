@@ -5,6 +5,7 @@
 #include "pixelformat.h"
 #include "resource.h"
 #include "foundation/metaprop.h"
+#include "foundation/exception.h"
 
 GF_NAMESPACE_BEGIN
 
@@ -47,64 +48,104 @@ namespace
     }
 }
 
-void Mesh::loadImpl()
+bool Mesh::loadImpl()
 {
     MetaPropFile file;
-    file.read(path().os);
+
+    try
+    {
+        file.read(path().os);
+    }
+    catch (const InvalidMetaPropFile&)
+    {
+        /// LOG
+        return false;
+    }
+    catch (const FileException&)
+    {
+        /// LOG
+        return false;
+    }
 
     vertexData_ = std::make_shared<VertexData>();
-    std::vector<float> floats;
-    std::vector<unsigned short> ints;
 
-    const auto& Vertex = file.group("Vertex");
-    vertexData_->setTopology(static_cast<PrimitiveTopology>(Vertex.prop("Topology").getInt(0)));
-
-    if (getFloatBuffer(Vertex, "V", floats))
+    try
     {
-        vertexData_->setVertices(Semantics::POSITION, 0, floats.data(), floats.size() * sizeof(float), PixelFormat::RGB32_float);
+        std::vector<float> floats;
+        std::vector<unsigned short> ints;
+
+        // @Vertex
+        enforce<MeshLoadException>(file.hasGroup("Vertex"), ".mesh requires @Vertex.");
+        const auto& Vertex = file.group("Vertex");
+
+        enforce<MeshLoadException>(Vertex.hasProp("Topology"), ".mesh requires Topology: in @Vertex.");
+        vertexData_->setTopology(static_cast<PrimitiveTopology>(Vertex.prop("Topology").getInt(0)));
+
+        if (getFloatBuffer(Vertex, "V", floats))
+        {
+            vertexData_->setVertices(Semantics::POSITION, 0, floats.data(), floats.size() * sizeof(float), PixelFormat::RGB32_float);
+        }
+        if (getFloatBuffer(Vertex, "N", floats))
+        {
+            vertexData_->setVertices(Semantics::NORMAL, 0, floats.data(), floats.size() * sizeof(float), PixelFormat::RGB32_float);
+        }
+        if (getFloatBuffer(Vertex, "C", floats))
+        {
+            vertexData_->setVertices(Semantics::COLOR, 0, floats.data(), floats.size() * sizeof(float), PixelFormat::RGBA32_float);
+        }
+        if (getFloatBuffer(Vertex, "U", floats))
+        {
+            vertexData_->setVertices(Semantics::TEXCOORD, 0, floats.data(), floats.size() * sizeof(float), PixelFormat::RG32_float);
+        }
+
+        if (getIntBuffer(Vertex, "I", ints))
+        {
+            vertexData_->setIndices(ints.data(), ints.size() * sizeof(unsigned short));
+        }
+
+        for (int i = 0; file.hasGroup("SubMesh" + std::to_string(i)); ++i)
+        {
+            const auto& SubMeshGroup = file.group("SubMesh" + std::to_string(i));
+
+            enforce<MeshLoadException>(SubMeshGroup.hasProp("Name"), ".mesh requires Name: in @SubMesh.");
+            const auto name = SubMeshGroup.prop("Name")[0];
+
+            enforce<MeshLoadException>(SubMeshGroup.hasProp("Material"), ".mesh requires Material: in @SubMesh.");
+            const auto materialPath = SubMeshGroup.prop("Material")[0];
+
+            enforce<MeshLoadException>(SubMeshGroup.hasProp("Indexed"), ".mesh requires Indexed: in @SubMesh.");
+            const auto indexed = !!SubMeshGroup.prop("Indexed").getInt(0);
+
+            enforce<MeshLoadException>(SubMeshGroup.hasProp("Range"), ".mesh requires Range: in @SubMesh.");
+            const auto& Range = SubMeshGroup.prop("Range");
+
+            const auto material = resourceManager.template obtain<Material>(materialPath);
+            material->load();
+            enforce<MaterialLoadException>(material->ready(), "Failed to load material.");
+
+            SubMesh subMesh;
+            subMesh.name = name;
+            subMesh.material = material;
+            subMesh.indexed = indexed;
+            subMesh.offset = Range.getInt(0);
+            subMesh.count = Range.getInt(1);
+
+            addSubMesh(subMesh);
+        }
     }
-    if (getFloatBuffer(Vertex, "N", floats))
+    catch (const ResourceException&)
     {
-        vertexData_->setVertices(Semantics::NORMAL, 0, floats.data(), floats.size() * sizeof(float), PixelFormat::RGB32_float);
-    }
-    if (getFloatBuffer(Vertex, "C", floats))
-    {
-        vertexData_->setVertices(Semantics::COLOR, 0, floats.data(), floats.size() * sizeof(float), PixelFormat::RGBA32_float);
-    }
-    if (getFloatBuffer(Vertex, "U", floats))
-    {
-        vertexData_->setVertices(Semantics::TEXCOORD, 0, floats.data(), floats.size() * sizeof(float), PixelFormat::RG32_float);
-    }
-
-    if (getIntBuffer(Vertex, "I", ints))
-    {
-        vertexData_->setIndices(ints.data(), ints.size() * sizeof(unsigned short));
-    }
-
-    for (int i = 0; file.hasGroup("SubMesh" + std::to_string(i)); ++i)
-    {
-        const auto& SubMeshGroup = file.group("SubMesh" + std::to_string(i));
-
-        const auto materialPath = SubMeshGroup.prop("Material")[0];
-        const auto material = resourceTable.template obtain<Material>(materialPath);
-        material->load();
-
-        const auto& Range = SubMeshGroup.prop("Range");
-
-        SubMesh subMesh;
-        subMesh.name = SubMeshGroup.prop("Name")[0];
-        subMesh.material = material;
-        subMesh.indexed = !!SubMeshGroup.prop("Indexed").getInt(0);
-        subMesh.offset = Range.getInt(0);
-        subMesh.count = Range.getInt(1);
-
-        addSubMesh(subMesh);
+        /// LOG
+        unloadImpl();
+        return false;
     }
     
     auto& copy = sceneAppContext.copyCommandBuilder();
     auto& graphics = sceneAppContext.graphicsCommandBuilder();
     copy.uploadVertices(*vertexData_);
     graphics.drawableState(*vertexData_);
+
+    return true;
 }
 
 void Mesh::unloadImpl()

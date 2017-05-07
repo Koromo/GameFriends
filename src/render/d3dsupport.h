@@ -27,6 +27,13 @@ public:
         : Exception(msg) {}
 };
 
+class Direct3DError : public Error
+{
+public:
+    explicit Direct3DError(const std::string& msg)
+        : Error(msg) {}
+};
+
 struct D3DMappings
 {
     static const D3D12_CPU_DESCRIPTOR_HANDLE CPU_DESCRIPTOR_UNKOWN;

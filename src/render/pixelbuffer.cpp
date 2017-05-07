@@ -20,9 +20,13 @@ PixelBuffer::PixelBuffer(const PixelBufferSetup& setup, const D3D12_CLEAR_VALUE*
     const auto state = D3DMappings::RESOURCE_STATES(setup.state);
 
     ID3D12Resource* resource;
-    verify<WindowsException>(renderSystem.nativeDevice().CreateCommittedResource(
-        &defaultHeap, D3D12_HEAP_FLAG_NONE, &desc, state, optimizedClear, IID_PPV_ARGS(&resource)),
-        "Failed to create ID3D12Resource.");
+    if (FAILED(renderSystem.nativeDevice().CreateCommittedResource(
+        &defaultHeap, D3D12_HEAP_FLAG_NONE, &desc, state, optimizedClear, IID_PPV_ARGS(&resource))))
+    {
+        /// LOG
+        return;
+    }
+
     resource->SetName(L"PixelBuffer");
     resource_ = makeComPtr(resource);
 
@@ -106,6 +110,11 @@ PixelBuffer::PixelBuffer(ID3D12Resource* backBuffer, const D3D12_RENDER_TARGET_V
 
 void PixelBuffer::upload(ID3D12GraphicsCommandList& list, const PixelUpload& pixels)
 {
+    if (!resource_)
+    {
+        return;
+    }
+
     const auto intermediateSize = static_cast<size_t>(GetRequiredIntermediateSize(resource_.get(), 0, 1));
     const auto intermediate = CpuAllocator()(intermediateSize, D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT);
 
@@ -115,11 +124,19 @@ void PixelBuffer::upload(ID3D12GraphicsCommandList& list, const PixelUpload& pix
     srcData.SlicePitch = srcData.RowPitch * pixels.height;
 
     const auto uploadedSize = UpdateSubresources<1>(&list, resource_.get(), intermediate.resource, intermediate.offset, 0, 1, &srcData);
-    check(uploadedSize == intermediateSize);
+    if (uploadedSize != intermediateSize)
+    {
+        /// LOG
+    }
 }
 
 void PixelBuffer::createShaderResourceView(ID3D12Device& device, D3D12_CPU_DESCRIPTOR_HANDLE location)
 {
+    if (!resource_)
+    {
+        return;
+    }
+
     const auto desc = resource_->GetDesc();
     check(!(desc.Flags & D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE));
 
@@ -155,9 +172,9 @@ DepthTargetView PixelBuffer::depthTargetView()
     return dtv_;
 }
 
-ID3D12Resource& PixelBuffer::nativeResource()
+ID3D12Resource* PixelBuffer::nativeResource()
 {
-    return *resource_;
+    return resource_.get();
 }
 
 GF_NAMESPACE_END

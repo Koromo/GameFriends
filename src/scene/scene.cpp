@@ -122,6 +122,8 @@ void SceneAppContext::startup()
 
     graphicsCommandBuilder_->transition(backBuffer(), PixelBufferState::present, PixelBufferState::renderTarget);
     graphicsCommandBuilder_->clearRenderTarget(backBuffer(), { 0, 0, 0, 1 });
+
+    /// LOG
 }
 
 void SceneAppContext::shutdown()
@@ -131,6 +133,8 @@ void SceneAppContext::shutdown()
     copyCommands_.reset();
     graphicsCommandBuilder_.reset();
     frameResources_.clear();
+
+    /// LOG
 }
 
 GpuCommandBuilder& SceneAppContext::graphicsCommandBuilder()
@@ -169,7 +173,6 @@ void SceneAppContext::executeCommandsAndPresent()
     copyExe.waitForFenceCompletion(copyCompleted);
 
     frameResources_[frameIndex].fenceValue_ = graphicsExe.execute(*graphicsCommandBuilder_);
-    //graphicsExe.waitForFenceCompletion(frameResources_[frameIndex].fenceValue_);
 
     renderSystem.present();
 

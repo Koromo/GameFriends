@@ -73,6 +73,7 @@ using namespace GF_NAMESPACE;
 #pragma comment(lib, "libfbxsdk-mt.lib")
 #pragma comment(lib, "xaudio2.lib")
 #pragma comment(lib, "winmm.lib")
+#pragma comment(lib, "Shlwapi.lib")
 
 #pragma comment(lib, "BulletCollision_vs2010_debug.lib")
 #pragma comment(lib, "BulletDynamics_vs2010_debug.lib")

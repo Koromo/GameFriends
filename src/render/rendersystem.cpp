@@ -2,10 +2,7 @@
 #include "pixelbuffer.h"
 #include "d3dsupport.h"
 #include "../windowing/window.h"
-
-
 #include "../engine/pixelformat.h"
-
 #include "foundation/color.h"
 
 GF_NAMESPACE_BEGIN
@@ -19,16 +16,25 @@ void RenderSystem::startup(Window& chainWindow, size_t numBackBuffers)
 {
 #ifdef GF_DEBUG
     ID3D12Debug* debug;
-    verify<Direct3DException>(D3D12GetDebugInterface(IID_PPV_ARGS(&debug)),
-        "Failed to enable the debug layer.");
-    debug->EnableDebugLayer();
-    debug->Release();
+    if (FAILED(D3D12GetDebugInterface(IID_PPV_ARGS(&debug))))
+    {
+        /// LOG:
+    }
+    else
+    {
+        debug->EnableDebugLayer();
+        debug->Release();
+    }
 #endif
 
+    numBackBuffers_ = numBackBuffers;
+
     ID3D12Device* device;
-    verify<Direct3DException>(
-        D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&device)),
-        "Failed to create the ID3D12Device.");
+    if (FAILED(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&device))))
+    {
+        /// LOG
+        throw Direct3DError("ID3D12Device creation failed");
+    }
     device->SetName(L"Device");
     device_ = makeComPtr(device);
 
@@ -36,8 +42,11 @@ void RenderSystem::startup(Window& chainWindow, size_t numBackBuffers)
     commandExecuter(GpuCommandType::copy).construct(device, GpuCommandType::copy);
 
     IDXGIFactory4* factory;
-    verify<WindowsException>(CreateDXGIFactory1(IID_PPV_ARGS(&factory)),
-        "Failed to create the IDXGIFactory.");
+    if (FAILED(CreateDXGIFactory1(IID_PPV_ARGS(&factory))))
+    {
+        /// LOG
+        throw Direct3DError("IDXGIFactory creation failed.");
+    }
     GF_SCOPE_EXIT{ factory->Release(); };
 
     DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
@@ -55,15 +64,20 @@ void RenderSystem::startup(Window& chainWindow, size_t numBackBuffers)
     swapChainDesc.Flags = 0;
 
     IDXGISwapChain1* swapChain1;
-    verify<WindowsException>(
-        factory->CreateSwapChainForHwnd(&commandExecuter(GpuCommandType::graphics).nativeQueue(),
-            chainWindow.handle(), &swapChainDesc, nullptr, nullptr, &swapChain1),
-        "Failed to create the IDXGISwapChain1.");
+    if (FAILED(factory->CreateSwapChainForHwnd(&commandExecuter(GpuCommandType::graphics).nativeQueue(),
+        chainWindow.handle(), &swapChainDesc, nullptr, nullptr, &swapChain1)))
+    {
+        /// LOG
+        throw Direct3DError("IDXGISwapChain1 creation failed.");
+    }
     GF_SCOPE_EXIT{ swapChain1->Release(); };
 
     IDXGISwapChain3* swapChain3;
-    verify<WindowsException>(swapChain1->QueryInterface(IID_PPV_ARGS(&swapChain3)),
-        "Failed to query the IDXGISwapChain3.");
+    if (FAILED(swapChain1->QueryInterface(IID_PPV_ARGS(&swapChain3))))
+    {
+        /// LOG
+        throw Direct3DError("IDXGISwapChain3 query failed.");
+    }
     swapChain_ = makeComPtr(swapChain3);
 
     descriptorHeaps_[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV].construct(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
@@ -81,8 +95,11 @@ void RenderSystem::startup(Window& chainWindow, size_t numBackBuffers)
     for (UINT i = 0; i < numBackBuffers; ++i)
     {
         ID3D12Resource* backBuffer;
-        verify<WindowsException>(swapChain3->GetBuffer(i, IID_PPV_ARGS(&backBuffer)),
-            "Falied to get the back buffer.");
+        if (FAILED(swapChain3->GetBuffer(i, IID_PPV_ARGS(&backBuffer))))
+        {
+            /// LOG
+            throw Direct3DError("Getting back buffers failed.");
+        }
         backBuffer->SetName(L"BackBuffer");
 
         D3D12_RENDER_TARGET_VIEW_DESC view = {};
@@ -98,6 +115,8 @@ void RenderSystem::startup(Window& chainWindow, size_t numBackBuffers)
     fullyViewport_.minDepth = 0;
     fullyViewport_.width = static_cast<float>(chainWindow.clientWidth());
     fullyViewport_.height = static_cast<float>(chainWindow.clientHeight());
+
+    /// LOG
 }
 
 void RenderSystem::shutdown()
@@ -121,13 +140,13 @@ void RenderSystem::shutdown()
     commandExecuter(GpuCommandType::copy).destruct();
 
     device_.reset();
+
+    /// LOG
 }
 
 size_t RenderSystem::numBackBuffers() const
 {
-    DXGI_SWAP_CHAIN_DESC desc = {};
-    verify<Direct3DException>(swapChain_->GetDesc(&desc), "Failed to describe the swap chain");
-    return desc.BufferCount;
+    return numBackBuffers_;
 }
 
 size_t RenderSystem::currentFrameIndex() const
@@ -152,8 +171,10 @@ GpuCommandExecuter& RenderSystem::commandExecuter(GpuCommandType type)
 
 void RenderSystem::present()
 {
-    verify<Direct3DException>(swapChain_->Present(1, 0),
-        "Failed to present the back buffer.");
+    if (FAILED(swapChain_->Present(1, 0)))
+    {
+        /// LOG:
+    }
     frameIndex_ = swapChain_->GetCurrentBackBufferIndex();
 }
 

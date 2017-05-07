@@ -25,6 +25,7 @@ class RenderSystem
 private:
     ComPtr<ID3D12Device> device_;
     ComPtr<IDXGISwapChain3> swapChain_;
+    size_t numBackBuffers_;
 
     size_t frameIndex_;
     std::vector<std::shared_ptr<PixelBuffer>> backBuffers_;
@@ -37,7 +38,7 @@ private:
     GraphicsPipelineStateCache graphicsPipelineStates_;
 
 public:
-    void startup(Window& chainWindow, size_t numBackBuffers);
+    void startup(Window& chainWindow, size_t numBackBuffers) noexcept(false);
     void shutdown();
 
     size_t numBackBuffers() const;

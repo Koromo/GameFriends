@@ -79,7 +79,7 @@ public:
     void createShaderResourceView(ID3D12Device& device, D3D12_CPU_DESCRIPTOR_HANDLE location);
     RenderTargetView renderTargetView();
     DepthTargetView depthTargetView();
-    ID3D12Resource& nativeResource();
+    ID3D12Resource* nativeResource();
 
 private:
     PixelBuffer(const PixelBufferSetup& setup, const D3D12_CLEAR_VALUE* optimizedClear);

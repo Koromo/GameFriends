@@ -39,7 +39,7 @@ public:
     LinearAllocator(const LinearAllocator&) = delete;
     LinearAllocator& operator =(const LinearAllocator&) = delete;
 
-    AllocatePoint allocate(size_t size, size_t alignment);
+    AllocatePoint allocate(size_t size, size_t alignment) noexcept(false);
 
 private:
     Page createNewPage();
@@ -47,12 +47,12 @@ private:
 
 struct CpuAllocator
 {
-    AllocatePoint operator ()(size_t size, size_t alignment);
+    AllocatePoint operator ()(size_t size, size_t alignment) noexcept(false);
 };
 
 struct GpuAllocator
 {
-    AllocatePoint operator ()(size_t size, size_t alignment);
+    AllocatePoint operator ()(size_t size, size_t alignment) noexcept(false);
 };
 
 GF_NAMESPACE_END

@@ -52,19 +52,9 @@ void OptimizedDrawCall::setShaderParameters(const ShaderParameters& param)
 
 void OptimizedDrawCall::setShaders(const ShaderProgram& shaders)
 {
-    const auto vs = shaders.shaderStage(ShaderType::vertex);
-    const auto ds = ResourceInterface<HLSLShader>();
-    const auto hs = ResourceInterface<HLSLShader>();
-    const auto gs = shaders.shaderStage(ShaderType::geometry);
-    const auto ps = shaders.shaderStage(ShaderType::pixel);
-
-    check(vs.useable());
-
-    psoDesc_.VS = vs.useable() ? vs->byteCode : D3D12_SHADER_BYTECODE{};
-    psoDesc_.DS = ds.useable() ? ds->byteCode : D3D12_SHADER_BYTECODE{};
-    psoDesc_.HS = hs.useable() ? hs->byteCode : D3D12_SHADER_BYTECODE{};
-    psoDesc_.GS = gs.useable() ? gs->byteCode : D3D12_SHADER_BYTECODE{};
-    psoDesc_.PS = ps.useable() ? ps->byteCode : D3D12_SHADER_BYTECODE{};
+    psoDesc_.VS = shaders.shaderStage(ShaderType::vertex); 
+    psoDesc_.GS = shaders.shaderStage(ShaderType::geometry); 
+    psoDesc_.PS = shaders.shaderStage(ShaderType::pixel); 
     psoDesc_.pRootSignature = &shaders.rootSignature();
 }
 

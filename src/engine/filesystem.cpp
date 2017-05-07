@@ -2,6 +2,7 @@
 #include "../windowing/windowsinc.h" // instead of unistd.h
 #include "foundation/string.h"
 #include "foundation/exception.h"
+#include <Shlwapi.h>
 
 GF_NAMESPACE_BEGIN
 
@@ -37,6 +38,12 @@ bool operator >=(const FilePath& a, const FilePath& b)
 
 void FileSystem::startup(const std::string& rootDirectory)
 {
+    if (!PathIsDirectoryA(rootDirectory.c_str()))
+    {
+        /// LOG
+        throw FileSystemError("The required root directory (" + rootDirectory + ") is not exists.");
+    }
+
     if (isOSPath(rootDirectory))
     {
         osRootPath_ = standard(rootDirectory);
@@ -47,10 +54,13 @@ void FileSystem::startup(const std::string& rootDirectory)
         GetCurrentDirectory(256, buf);
         osRootPath_ = standard(narrow(buf) + '/' + rootDirectory);
     }
+
+    /// LOG
 }
 
 void FileSystem::shutdown()
 {
+    /// LOG
 }
 
 std::string FileSystem::standard(const std::string& path) const
@@ -84,7 +94,7 @@ std::string FileSystem::standard(const std::string& path) const
         }
         else if (s[p] == '.' && s[p + 1] == '.')
         {
-            check(s[p + 2] == '/');
+            //check(s[p + 2] == '/');
             const auto q = stdPath.rfind('/');
             if (q != std::string::npos)
             {
@@ -137,6 +147,7 @@ std::string FileSystem::toRelativePath(const std::string& path) const
 
     const auto stdPathSlash = standard(path) + '/';
     const auto osRootPathSlash = osRootPath_ + '/';
+
     int diffAt = 0;
     for (size_t p = 0; p < stdPathSlash.length() && p < osRootPathSlash.length() &&
         stdPathSlash[p] == osRootPathSlash[p]; ++p)
@@ -171,7 +182,7 @@ bool FileSystem::isOSPath(const std::string& path) const
 {
     if (path.length() >= 2)
     {
-        if (((path[0] >= 'A' && path[0] <= 'Z') || (path[0] >= 'a' && path[0] <= 'z')) && path[1] == ':')
+        if (tolower(path[0]) >= 'a' && tolower(path[0]) <= 'z' && path[1] == ':')
         {
             return true;
         }

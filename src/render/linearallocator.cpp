@@ -68,9 +68,11 @@ LinearAllocator::Page LinearAllocator::createNewPage()
     const auto desc = CD3DX12_RESOURCE_DESC::Buffer(size, flags);
 
     ID3D12Resource* resource;
-    verify<Direct3DException>(device_->CreateCommittedResource(&heapProp, D3D12_HEAP_FLAG_NONE,
-        &desc, state, nullptr, IID_PPV_ARGS(&resource)),
-        "Failed to create the ID3D12Resource.");
+    if (FAILED(device_->CreateCommittedResource(&heapProp, D3D12_HEAP_FLAG_NONE, &desc, state, nullptr, IID_PPV_ARGS(&resource))))
+    {
+        /// LOG
+        throw Direct3DException("Failed to create the ID3D12Resource.");
+    }
     resource->SetName(L"LinearBuffer");
 
     Page page;
@@ -78,8 +80,8 @@ LinearAllocator::Page LinearAllocator::createNewPage()
     page.offset = 0;
     if (type_ == D3D12_HEAP_TYPE_UPLOAD)
     {
-        verify<Direct3DException>(resource->Map(0, nullptr, &page.mappedData),
-            "failed to map.");
+        auto hr = resource->Map(0, nullptr, &page.mappedData);
+        check(SUCCEEDED(hr));
     }
 
     return page;

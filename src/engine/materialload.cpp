@@ -13,116 +13,151 @@ GF_NAMESPACE_BEGIN
 
 namespace
 {
-    MatParamType toMatParamType(const std::string& s)
+    bool toMatParamType(const std::string& s, MatParamType& out)
     {
-        if (s == "float") return MatParamType::_float;
-        if (s == "float4") return MatParamType::_float4;
-        if (s == "float4x4") return MatParamType::_float4x4;
-        if (s == "tex2d") return MatParamType::_tex2d;
-        check(false);
-        return MatParamType::_float;
+        if (s == "float") out = MatParamType::_float;
+        else if (s == "float4") out = MatParamType::_float4;
+        else if (s == "float4x4") out = MatParamType::_float4x4;
+        else if (s == "tex2d") out = MatParamType::_tex2d;
+        else return false;
+        return true;
     }
 }
 
-void ShadeModel::loadImpl()
+bool ShadeModel::loadImpl()
 {
     MetaPropFile file;
-    file.read(path().os);
 
-    std::unordered_map<std::string, MatParamType> paramTypes;
-
-    // @Parameters
-    const auto& Parameters = file.group("Parameters");
-    for (int i = 0; Parameters.hasProp(std::to_string(i)); ++i)
+    try
     {
-        const auto& prop = Parameters.prop(std::to_string(i));
-        const auto type = toMatParamType(prop[0]);
-        const auto name = prop[1];
-        params_.emplace_back(name, type);
-        paramTypes.emplace(name, type);
+        file.read(path().os);
+    }
+    catch (const InvalidMetaPropFile&)
+    {
+        /// LOG
+        return false;
+    }
+    catch (const FileException&)
+    {
+        /// LOG
+        return false;
     }
 
-    // ShaderStages
-    const auto parseShaderStage = [&](ShaderType stageType, const std::string& stageName)
+    try
     {
-        if (file.hasGroup(stageName))
+        std::unordered_map<std::string, MatParamType> paramTypes;
+
+        // @Parameters
+        enforce<ShadeModelLoadException>(file.hasGroup("Parameters"), ".shade requires @Parameters.");
+        const auto& Parameters = file.group("Parameters");
+
+        for (int i = 0; Parameters.hasProp(std::to_string(i)); ++i)
         {
-            const auto& VS = file.group(stageName);
+            const auto& prop = Parameters.prop(std::to_string(i));
 
-            const auto& Compile = VS.prop("Compile");
-            const auto path = Compile[0];
-            const auto entry = Compile[1];
-            program_.compile(stageType, path, entry);
+            MatParamType type;
+            const auto name = prop[1];
+            enforce<ShadeModelLoadException>(toMatParamType(prop[0], type), "Invalid parameter type.");
 
-            for (int i = 0; VS.hasProp("Map" + std::to_string(i)); ++i)
+            params_.emplace_back(name, type);
+            paramTypes.emplace(name, type);
+        }
+
+        // ShaderStages
+        const auto parseShaderStage = [&, this](ShaderType stageType, const std::string& stageName)
+        {
+            if (file.hasGroup(stageName))
             {
-                const auto& Map = VS.prop("Map" + std::to_string(i));
-                const auto param = Map[0];
-                const auto mapTo = Map[1];
-                check(paramTypes.find(param) != std::cend(paramTypes));
+                const auto& SS = file.group(stageName);
 
-                const auto type = paramTypes[param];
-                detail::Mapping mapping;
-                mapping.maxSize = sizeofMatParam(type);
-                mapping.toName = mapTo;
-                mapping.toType = stageType;
+                enforce<ShadeModelLoadException>(SS.hasProp("Compile"),
+                    ".shade requires Compile: in @" + stageName + ").");
+                const auto& Compile = SS.prop("Compile");
 
-                if (isNumeric(type))
+                const auto path = Compile[0];
+                const auto entry = Compile[1];
+                program_.compile(stageType, path, entry);
+
+                for (int i = 0; SS.hasProp("Map" + std::to_string(i)); ++i)
                 {
-                    numericMappings_.emplace(param, mapping);
-                }
-                else
-                {
-                    textureMappings_.emplace(param, mapping);
+                    const auto& Map = SS.prop("Map" + std::to_string(i));
+                    const auto param = Map[0];
+                    const auto mapTo = Map[1];
+
+                    enforce<ShadeModelLoadException>(paramTypes.find(param) != std::cend(paramTypes),
+                        "Parameter " + param + " not found in Map:.");
+
+                    const auto type = paramTypes[param];
+                    detail::Mapping mapping;
+                    mapping.maxSize = sizeofMatParam(type);
+                    mapping.toName = mapTo;
+                    mapping.toType = stageType;
+
+                    if (isNumeric(type))
+                    {
+                        numericMappings_.emplace(param, mapping);
+                    }
+                    else
+                    {
+                        textureMappings_.emplace(param, mapping);
+                    }
                 }
             }
+        };
+
+        parseShaderStage(ShaderType::vertex, "VS");
+        parseShaderStage(ShaderType::geometry, "GS");
+        parseShaderStage(ShaderType::pixel, "PS");
+        drawCall_.setShaders(program_);
+
+        // @DepthStencil
+        if (file.hasGroup("DepthStencil"))
+        {
+            DepthState state = DepthState::DEFAULT;
+            const auto& DepthStencil = file.group("DepthStencil");
+
+            if (DepthStencil.hasProp("DepthEnable"))
+            {
+                state.depthEnable = !!DepthStencil.prop("DepthEnable").getInt(0);
+            }
+            if (DepthStencil.hasProp("DepthFun"))
+            {
+                state.depthFun = static_cast<ComparisonFun>(DepthStencil.prop("DepthFun").getInt(0));
+            }
+
+            drawCall_.setDepthState(state);
         }
-    };
 
-    parseShaderStage(ShaderType::vertex, "VS");
-    parseShaderStage(ShaderType::geometry, "GS");
-    parseShaderStage(ShaderType::pixel, "PS");
-    drawCall_.setShaders(program_);
+        // @Rasterizer
+        if (file.hasGroup("Rasterizer"))
+        {
+            RasterizerState state = RasterizerState::DEFAULT;
+            const auto& Rasterizer = file.group("Rasterizer");
 
-    // @DepthStencil
-    if (file.hasGroup("DepthStencil"))
+            if (Rasterizer.hasProp("Fill"))
+            {
+                state.fillMode = static_cast<FillMode>(Rasterizer.prop("Fill").getInt(0));
+            }
+            if (Rasterizer.hasProp("Cull"))
+            {
+                state.cullFace = static_cast<CullingFace>(Rasterizer.prop("Cull").getInt(0));
+            }
+            if (Rasterizer.hasProp("DepthClip"))
+            {
+                state.depthClip = !!Rasterizer.prop("DepthClip").getInt(0);
+            }
+
+            drawCall_.setRasterizerState(state);
+        }
+    }
+    catch (const ResourceException&)
     {
-        DepthState state = DepthState::DEFAULT;
-        const auto& DepthStencil = file.group("DepthStencil");
-        
-        if (DepthStencil.hasProp("DepthEnable"))
-        {
-            state.depthEnable = !!DepthStencil.prop("DepthEnable").getInt(0);
-        }
-        if (DepthStencil.hasProp("DepthFun"))
-        {
-            state.depthFun = static_cast<ComparisonFun>(DepthStencil.prop("DepthFun").getInt(0));
-        }
-
-        drawCall_.setDepthState(state);
+        /// LOG
+        unloadImpl();
+        return false;
     }
 
-    // @Rasterizer
-    if (file.hasGroup("Rasterizer"))
-    {
-        RasterizerState state = RasterizerState::DEFAULT;
-        const auto& Rasterizer = file.group("Rasterizer");
-
-        if (Rasterizer.hasProp("Fill"))
-        {
-            state.fillMode = static_cast<FillMode>(Rasterizer.prop("Fill").getInt(0));
-        }
-        if (Rasterizer.hasProp("Cull"))
-        {
-            state.cullFace = static_cast<CullingFace>(Rasterizer.prop("Cull").getInt(0));
-        }
-        if (Rasterizer.hasProp("DepthClip"))
-        {
-            state.depthClip = !!Rasterizer.prop("DepthClip").getInt(0);
-        }
-
-        drawCall_.setRasterizerState(state);
-    }
+    return true;
 }
 
 void ShadeModel::unloadImpl()
@@ -134,69 +169,101 @@ void ShadeModel::unloadImpl()
     drawCall_ = OptimizedDrawCall();
 }
 
-void Material::loadImpl()
+bool Material::loadImpl()
 {
     MetaPropFile file;
-    file.read(path().os);
 
-    // @Shade
-    const auto& Shade = file.group("Shade");
-    const auto shadeModelPath = Shade.prop("Path")[0];
-
-    const auto model = resourceTable.template obtain<ShadeModel>(shadeModelPath);
-    model->load();
-    shadeModel_ = model;
-
-    const auto numModelParams = model->numParameters();
-    for (size_t i = 0; i < numModelParams; ++i)
+    try
     {
-        std::string name;
-        MatParamType type;
-        model->parameter(i, name, type);
-
-        ParamHolder holder;
-        holder.type = type;
-
-        if (isNumeric(type))
-        {
-            holder.numeric.reset(new char[sizeofMatParam(type)]);
-        }
-        params_.emplace(name, holder);
+        file.read(path().os);
+    }
+    catch (const InvalidMetaPropFile&)
+    {
+        /// LOG
+        return false;
+    }
+    catch (const FileException&)
+    {
+        /// LOG
+        return false;
     }
 
-    shadeModelIn_ = model->createInput();
-    for (size_t i = 0; i < numModelParams; ++i)
+    try
     {
-        std::string name;
-        MatParamType type;
-        model->parameter(i, name, type);
+        // @Shade
+        enforce<MaterialLoadException>(file.hasGroup("Shade"), ".material requires @Shade.");
+        const auto& Shade = file.group("Shade");
 
-        auto& holder = params_[name];
-        const auto& prop = Shade.prop(name);
+        enforce<MaterialLoadException>(Shade.hasProp("Path"), ".material requires Path: in @Shade.");
+        const auto shadeModelPath = Shade.prop("Path")[0];
 
-        if (isNumeric(type))
+        const auto model = resourceManager.template obtain<ShadeModel>(shadeModelPath);
+        model->load();
+        enforce<ShadeModelLoadException>(model->ready(), "Failed to load .shade.");
+        shadeModel_ = model;
+
+        const auto numModelParams = model->numParameters();
+        for (size_t i = 0; i < numModelParams; ++i)
         {
-            if (isFloating(type))
+            std::string name;
+            MatParamType type;
+            model->parameter(i, name, type);
+
+            ParamHolder holder;
+            holder.type = type;
+
+            if (isNumeric(type))
             {
-                const auto propSize = prop.size();
-                check(sizeof(float) * propSize <= sizeofMatParam(type));
-                const auto floats = reinterpret_cast<float*>(holder.numeric.get());
-                for (size_t n = 0; n < propSize; ++n)
-                {
-                    floats[n] = prop.getFloat(n);
-                }
+                holder.numeric.reset(new char[sizeofMatParam(type)]);
             }
-            shadeModelIn_->updateNumeric(name, holder.numeric.get(), sizeofMatParam(type));
+            params_.emplace(name, holder);
         }
-        else
+
+        shadeModelIn_ = model->createInput();
+        for (size_t i = 0; i < numModelParams; ++i)
         {
-            const auto texPath = prop[0];
-            const auto tex = resourceTable.template obtain<MediaTexture>(texPath);
-            tex->load();
-            holder.texture = tex;
-            shadeModelIn_->updateTexture(name, tex->resource());
+            std::string name;
+            MatParamType type;
+            model->parameter(i, name, type);
+
+            auto& holder = params_[name];
+
+            enforce<MaterialLoadException>(Shade.hasProp(name),
+                ".material requires parameter value " + name + " in @Shade.");
+            const auto& prop = Shade.prop(name);
+
+            if (isNumeric(type))
+            {
+                if (isFloating(type))
+                {
+                    const auto propSize = prop.size();
+                    const auto floats = reinterpret_cast<float*>(holder.numeric.get());
+                    for (size_t n = 0; n < sizeofMatParam(type) / sizeof(float) && n < propSize; ++n)
+                    {
+                        floats[n] = prop.getFloat(n);
+                    }
+                }
+                shadeModelIn_->updateNumeric(name, holder.numeric.get(), sizeofMatParam(type));
+            }
+            else
+            {
+                const auto texPath = prop[0];
+                const auto tex = resourceManager.template obtain<MediaTexture>(texPath);
+                tex->load();
+                enforce<TextureLoadException>(tex->ready(), "Failed to load texture.");
+                holder.texture = tex;
+                shadeModelIn_->updateTexture(name, tex->resource());
+            }
         }
     }
+    catch (const ResourceException&)
+    {
+        /// LOG
+        unloadImpl();
+        return false;
+    }
+
+    return true;
 }
 
 void Material::unloadImpl()

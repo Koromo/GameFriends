@@ -22,8 +22,8 @@ void Resource::load()
 {
     if (!ready_)
     {
-        loadImpl();
-        ready_ = true;
+        /// LOG
+        ready_ = loadImpl();
     }
 }
 
@@ -36,7 +36,18 @@ void Resource::unload()
     }
 }
 
-void ResourceTable::destroy(const FilePath& path)
+void ResourceManager::startup()
+{
+    /// LOG
+}
+
+void ResourceManager::shutdown()
+{
+    clear();
+    /// LOG
+}
+
+void ResourceManager::destroy(const FilePath& path)
 {
     const auto it = resourceMap_.find(path);
     if (it != std::cend(resourceMap_))
@@ -46,12 +57,12 @@ void ResourceTable::destroy(const FilePath& path)
     }
 }
 
-void ResourceTable::destroy(const std::string& path)
+void ResourceManager::destroy(const std::string& path)
 {
     destroy(fileSystem.path(path));
 }
 
-void ResourceTable::clear()
+void ResourceManager::clear()
 {
     while (!resourceMap_.empty())
     {
@@ -59,6 +70,6 @@ void ResourceTable::clear()
     }
 }
 
-ResourceTable resourceTable;
+ResourceManager resourceManager;
 
 GF_NAMESPACE_END

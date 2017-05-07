@@ -27,6 +27,13 @@ public:
         : Exception(msg) {}
 };
 
+class XAudioError : public Error
+{
+public:
+    explicit XAudioError(const std::string& msg)
+        : Error(msg) {}
+};
+
 template <class T>
 using VoicePtr = std::shared_ptr<T>;
 

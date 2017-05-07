@@ -2,33 +2,14 @@
 #include "rootsignature.h"
 #include "pixelbuffer.h"
 #include "rendersystem.h"
-#include "d3dsupport.h"
 #include "foundation/string.h"
 #include "foundation/math.h"
+#include "foundation/exception.h"
 
 GF_NAMESPACE_BEGIN
 
 namespace
 {
-    std::string shaderID(const std::string& path, const std::string& entry, const std::string& model,
-        std::initializer_list<ShaderMacro>& macros)
-    {
-        std::string expands("-" + entry + "-" + model);
-        for (const auto& m : macros)
-        {
-            expands += "-" + m.name + "_" + m.value;
-        }
-
-        auto p = path.find_last_of(".");
-        if (p == std::string::npos)
-        {
-            p = path.length();
-        }
-        auto id = path;
-        id.insert(p, expands);
-        return id;
-    }
-
     size_t index(ShaderType t)
     {
         return static_cast<size_t>(t);
@@ -133,29 +114,35 @@ void ShaderParameters::createBindingMap(ID3D12ShaderReflection* shader, const Sh
     }
 
     D3D12_SHADER_DESC shaderDesc = {};
-    verify<Direct3DException>(shader->GetDesc(&shaderDesc), "Failed to get the detail of shader.");
+    auto hr = shader->GetDesc(&shaderDesc);
+    check(SUCCEEDED(hr));
 
     for (unsigned i = 0; i < shaderDesc.BoundResources; ++i)
     {
         D3D12_SHADER_INPUT_BIND_DESC bindDesc;
-        shader->GetResourceBindingDesc(i, &bindDesc);
+        hr = shader->GetResourceBindingDesc(i, &bindDesc);
+        check(SUCCEEDED(hr));
 
         switch (bindDesc.Type)
         {
         case D3D_SIT_CBUFFER: {
-            ID3D12ShaderReflectionConstantBuffer* bufferRef = enforce<Direct3DException>(
-                shader->GetConstantBufferByName(bindDesc.Name), "ref->GetConstantBufferByName(0)");
+            ID3D12ShaderReflectionConstantBuffer* bufferRef = shader->GetConstantBufferByName(bindDesc.Name);
+            check(!!bufferRef);
 
             D3D12_SHADER_BUFFER_DESC bufferDesc = {};
-            verify<Direct3DException>(bufferRef->GetDesc(&bufferDesc), "cbRef->GetDesc(&cbDesc)");
+            hr = bufferRef->GetDesc(&bufferDesc);
+            check(SUCCEEDED(hr));
 
             const auto uploadHeap = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
             const auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(ceiling<size_t>(bufferDesc.Size, 256));
 
             ID3D12Resource* resource;
-            verify<Direct3DException>(renderSystem.nativeDevice().CreateCommittedResource(
-                &uploadHeap, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&resource)),
-                "Failed to create the ID3D12Resource.");
+            if (FAILED(renderSystem.nativeDevice().CreateCommittedResource(&uploadHeap, D3D12_HEAP_FLAG_NONE,
+                &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&resource))))
+            {
+                /// LOG
+                break;
+            }
             resource->SetName(L"ConstantBuffer");
 
             ConstantBuffer bufferHolder;
@@ -170,15 +157,17 @@ void ShaderParameters::createBindingMap(ID3D12ShaderReflection* shader, const Sh
             out.cbuf.emplace(bindDesc.Name, bufferHolder);
 
             char* mappedData;
-            verify<Direct3DException>(
-                resource->Map(0, nullptr, reinterpret_cast<void**>(&mappedData)), "Failed to buffer mapping.");
+            hr = resource->Map(0, nullptr, reinterpret_cast<void**>(&mappedData));
+            check(SUCCEEDED(hr));
 
             for (UINT i = 0; i < bufferDesc.Variables; ++i)
             {
                 const auto varRef = bufferRef->GetVariableByIndex(i);
+                check(!!varRef);
 
                 D3D12_SHADER_VARIABLE_DESC varDesc;
-                verify<Direct3DException>(varRef->GetDesc(&varDesc), "varRef->GetDesc(&varDesc)");
+                hr = varRef->GetDesc(&varDesc);
+                check(SUCCEEDED(hr));
 
                 Variable var;
                 var.ptr = mappedData + varDesc.StartOffset;
@@ -211,67 +200,107 @@ void ShaderParameters::createBindingMap(ID3D12ShaderReflection* shader, const Sh
     }
 }
 
-HLSLShader::HLSLShader(const FilePath& id)
-    : Resource(id)
+HLSLShader::HLSLShader(const FilePath& path)
+    : Resource(path)
+    , model_()
+    , entry_()
+    , macros_()
+    , compiledShaders_()
 {
 }
 
-void HLSLShader::loadImpl()
+void HLSLShader::setModel(const std::string& model)
 {
+    model_ = model;
+}
+
+void HLSLShader::setEntry(const std::string& entry)
+{
+    entry_ = entry;
+}
+
+void HLSLShader::setMacros(std::initializer_list<ShaderMacro>& macros)
+{
+    macros_ = std::vector<ShaderMacro>(std::cbegin(macros), std::cend(macros));
+}
+
+CompiledShader HLSLShader::compile()
+{
+    auto hashStr = entry_ + "-" + model_;
+    for (const auto& m : macros_)
+    {
+        hashStr += "-" + m.name + "_" + m.value;
+    }
+
+    auto& compiled = compiledShaders_[hashStr];
+    if (!compiled.code)
+    {
 #ifdef GF_DEBUG
-    const auto FLAGS = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+        const auto FLAGS = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #else
-    const auto FLAGS = 0;
+        const auto FLAGS = 0;
 #endif
 
-    std::vector<D3D_SHADER_MACRO> d3dMacros;
-    d3dMacros.reserve(macros.size() + 1);
-    for (const auto& m: macros)
-    {
-        d3dMacros.emplace_back(D3D_SHADER_MACRO{ m.name.c_str(), m.value.c_str() });
-    }
-    d3dMacros.emplace_back(D3D_SHADER_MACRO{ nullptr, nullptr });
-
-    ID3DBlob* blob;
-    ID3DBlob* err = NULL;
-
-    const auto hr = D3DCompileFromFile(widen(file.os).c_str(), d3dMacros.data(), D3D_COMPILE_STANDARD_FILE_INCLUDE,
-        entry.c_str(), model.c_str(), FLAGS, 0, &blob, &err);
-    if (FAILED(hr))
-    {
-        if (err)
+        std::vector<D3D_SHADER_MACRO> d3dMacros;
+        d3dMacros.reserve(macros_.size() + 1);
+        for (const auto& m : macros_)
         {
-            const std::string msg = static_cast<char*>(err->GetBufferPointer());
-            err->Release();
-            throw ShaderCompileError(msg);
+            d3dMacros.emplace_back(D3D_SHADER_MACRO{ m.name.c_str(), m.value.c_str() });
         }
-        throw FileException("File not found (" + file.os + ").");
+        d3dMacros.emplace_back(D3D_SHADER_MACRO{ nullptr, nullptr });
+
+        ID3DBlob* blob;
+        ID3DBlob* err = NULL;
+
+        const auto hr = D3DCompileFromFile(widen(path().os).c_str(), d3dMacros.data(), D3D_COMPILE_STANDARD_FILE_INCLUDE,
+            entry_.c_str(), model_.c_str(), FLAGS, 0, &blob, &err);
+        if (FAILED(hr))
+        {
+            /// LOG
+            if (err)
+            {
+                const std::string msg = static_cast<char*>(err->GetBufferPointer());
+                err->Release();
+                throw ShaderCompileError(msg);
+            }
+            throw ShaderCompileError("File not found (" + path().os + ").");
+        }
+
+        compiled.code = makeComPtr(blob);
+
+        ID3D12ShaderReflection* ref;
+        D3DReflect(blob->GetBufferPointer(), blob->GetBufferSize(), IID_PPV_ARGS(&ref));
+        compiled.ref = makeComPtr(ref);
+
+        check(ref);
     }
-    code = makeComPtr(blob);
 
-    byteCode.pShaderBytecode = blob->GetBufferPointer();
-    byteCode.BytecodeLength = blob->GetBufferSize();
+    CompiledShader ret;
+    ret.code.pShaderBytecode = compiled.code->GetBufferPointer();
+    ret.code.BytecodeLength = compiled.code->GetBufferSize();
+    ret.reflect = compiled.ref.get();
 
-    ID3D12ShaderReflection* ref;
-    verify<Direct3DException>(
-        D3DReflect(code->GetBufferPointer(), code->GetBufferSize(), IID_PPV_ARGS(&ref)),
-        "Failed to reflect the shader.");
-    reflection = makeComPtr(ref);
+    return ret;
+}
+
+bool HLSLShader::loadImpl()
+{
+    return true;
 }
 
 void HLSLShader::unloadImpl()
 {
-    reflection.reset();
-    code.reset();
+    compiledShaders_.clear();
 }
 
 ShaderProgram::ShaderProgram()
     : shaders_()
     , signatures_{}
 {
+    shaders_.fill(CompiledShader{});
 }
 
-void ShaderProgram::compile(ShaderType type, const std::string& path_, const std::string& entry,
+void ShaderProgram::compile(ShaderType type, const std::string& path, const std::string& entry,
     std::initializer_list<ShaderMacro>& macros)
 {
     std::string model;
@@ -293,20 +322,17 @@ void ShaderProgram::compile(ShaderType type, const std::string& path_, const std
         check(false);
     }
 
-    const auto path = fileSystem.path(path_);
-    const auto id = shaderID(path.relative, entry, model, macros);
-    const auto shader = resourceTable.template obtain<HLSLShader>(id);
-    if (!shader->ready())
-    {
-        shader->file = path;
-        shader->entry = entry;
-        shader->model = model;
-        shader->macros = macros;
-        shader->load();
-    }
+    const auto shaderFile = resourceManager.template obtain<HLSLShader>(path);
+    shaderFile->load();
+
+    shaderFile->setEntry(entry);
+    shaderFile->setModel(model);
+    shaderFile->setMacros(macros);
+
+    const auto shader = shaderFile->compile();
     shaders_[index(type)] = shader;
     
-    const auto sig = signatureOf(*shader->reflection);
+    const auto sig = signatureOf(*shader.reflect);
     switch (type)
     {
     case ShaderType::vertex:
@@ -329,16 +355,12 @@ void ShaderProgram::compile(ShaderType type, const std::string& path_, const std
 std::shared_ptr<ShaderParameters> ShaderProgram::createParameters() const
 {
     return std::make_shared<ShaderParameters>(
-        shaders_[0].useable() ? shaders_[0]->reflection.get() : nullptr,
-        shaders_[1].useable() ? shaders_[1]->reflection.get() : nullptr,
-        shaders_[2].useable() ? shaders_[2]->reflection.get() : nullptr,
-        signatures_
-        );
+        shaders_[0].reflect, shaders_[1].reflect, shaders_[2].reflect, signatures_);
 }
 
-ResourceInterface<const HLSLShader> ShaderProgram::shaderStage(ShaderType type) const
+D3D12_SHADER_BYTECODE ShaderProgram::shaderStage(ShaderType type) const
 {
-    return shaders_[index(type)];
+    return shaders_[index(type)].code;
 }
 
 ID3D12RootSignature& ShaderProgram::rootSignature() const
@@ -349,13 +371,15 @@ ID3D12RootSignature& ShaderProgram::rootSignature() const
 ShaderSignature ShaderProgram::signatureOf(ID3D12ShaderReflection& shader) const
 {
     D3D12_SHADER_DESC desc = {};
-    verify<Direct3DException>(shader.GetDesc(&desc), "Failed to get the detail of shader.");
+    auto hr = shader.GetDesc(&desc);
+    check(SUCCEEDED(hr));
 
     ShaderSignature sig = {};
     for (size_t i = 0; i < desc.BoundResources; ++i)
     {
         D3D12_SHADER_INPUT_BIND_DESC bound;
-        shader.GetResourceBindingDesc(i, &bound);
+        hr = shader.GetResourceBindingDesc(i, &bound);
+        check(SUCCEEDED(hr));
 
         switch (bound.Type)
         {

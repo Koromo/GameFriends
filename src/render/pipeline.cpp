@@ -47,8 +47,11 @@ ID3D12PipelineState& GraphicsPipelineStateCache::obtain(const D3D12_GRAPHICS_PIP
     if (!obj)
     {
         ID3D12PipelineState* pso;
-        verify<Direct3DException>(device_->CreateGraphicsPipelineState(&key, IID_PPV_ARGS(&pso)),
-            "Failed to create the ID3D12PipelineState.");
+        if (FAILED(device_->CreateGraphicsPipelineState(&key, IID_PPV_ARGS(&pso))))
+        {
+            /// LOG
+            throw Direct3DException("Failed to create ID3D12PipelineState.");
+        }
         pso->SetName(L"PipelineStateObject");
 
         obj = makeComPtr(pso);

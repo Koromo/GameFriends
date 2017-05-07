@@ -18,9 +18,22 @@ PixelBuffer& MediaTexture::resource()
     return *resource_;
 }
 
-void MediaTexture::loadImpl()
+bool MediaTexture::loadImpl()
 {
-    image_ = decodeBmp(path().os);
+    try
+    {
+        image_ = decodeBmp(path().os);
+    }
+    catch (const CodecException&)
+    {
+        /// LOG
+        return false;
+    }
+    catch (const FileException&)
+    {
+        /// LOG
+        return false;
+    }
 
     PixelBufferSetup setup = {};
     setup.width = image_->width();
@@ -42,10 +55,13 @@ void MediaTexture::loadImpl()
     auto& graphics = sceneAppContext.graphicsCommandBuilder();
     copy.uploadPixels(upload, *resource_);
     graphics.transition(*resource_, PixelBufferState::copyDest, PixelBufferState::genericRead);
+
+    return true;
 }
 
 void MediaTexture::unloadImpl()
 {
+    image_.reset();
     resource_.reset();
 }
 

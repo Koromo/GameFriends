@@ -32,7 +32,7 @@ private:
 
 public:
     explicit RootSignatureObtain(const EachShaderSignature& sig);
-    ID3D12RootSignature& operator ()() const;
+    ID3D12RootSignature& operator ()() const noexcept(false);
 };
 
 class RootSignatureCache
@@ -49,7 +49,7 @@ public:
     RootSignatureCache(const RootSignatureCache&) = delete;
     RootSignatureCache& operator =(const RootSignatureCache&) = delete;
 
-    ID3D12RootSignature& obtain(const EachShaderSignature& key);
+    ID3D12RootSignature& obtain(const EachShaderSignature& key) noexcept(false);
 };
 
 GF_NAMESPACE_END

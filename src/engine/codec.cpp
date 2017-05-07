@@ -1,4 +1,5 @@
 #include "codec.h"
+#include "resource.h"
 #include "filesystem.h"
 #include "foundation/exception.h"
 #include "foundation/math.h"
@@ -94,8 +95,8 @@ std::shared_ptr<Image> decodeBmp(const std::string& path_)
 
     BMPFileHeader bf;
     BMPInfoHeader bi;
-    enforce<CodecException>(std::fread(&bf, sizeof(bf), 1, file) == 1, "Invalid .bmp file.");
-    enforce<CodecException>(std::fread(&bi, sizeof(bi), 1, file) == 1, "Invalid .bmp file.");
+    enforce<CodecException>(std::fread(&bf, sizeof(bf), 1, file) == 1, ".bmp reading failed.");
+    enforce<CodecException>(std::fread(&bi, sizeof(bi), 1, file) == 1, ".bmp reading failed.");
 
     enforce<CodecException>(checkFormat(bf, bi), "Not supportted .bmp file format.");
 
@@ -106,7 +107,7 @@ std::shared_ptr<Image> decodeBmp(const std::string& path_)
 
     for (int32 y = bi.height - 1; y >= 0; --y)
     {
-        enforce<CodecException>(std::fread(buffer.data(), strideWidth, 1, file) == 1, ".bmp read error.");
+        enforce<CodecException>(std::fread(buffer.data(), strideWidth, 1, file) == 1, ".bmp reading failed.");
         auto it = std::cbegin(buffer);
         for (int32 x = 0; x < bi.width; ++x)
         {

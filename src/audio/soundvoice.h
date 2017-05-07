@@ -21,7 +21,9 @@ public:
     void start();
     void stop();
     void flush();
+
     size_t numQueuedBuffers();
+
     float frequencyRatio();
     void setFrequencyRatio(float ratio);
     void setOutputMatrix(size_t numSrcChannels, size_t numDestChannels, const float* levelMatrix);

@@ -74,7 +74,7 @@ public:
     void setIndices(const unsigned short* data, size_t size);
     void setTopology(PrimitiveTopology pt);
     void upload(ID3D12GraphicsCommandList& list);
-    bool drawableState(ID3D12GraphicsCommandList& list);
+    void drawableState(ID3D12GraphicsCommandList& list);
 
     auto vertexBuffers() const ->
         decltype(std::make_pair(std::cbegin(vertexBufferViews_), std::cend(vertexBufferViews_)))

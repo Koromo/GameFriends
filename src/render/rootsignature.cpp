@@ -124,13 +124,16 @@ ID3D12RootSignature& RootSignatureCache::obtain(const EachShaderSignature& key)
                 msg += reinterpret_cast<char*>(err->GetBufferPointer());
                 err->Release();
             }
+            /// LOG
             throw Direct3DException(msg);
         }
 
         ID3D12RootSignature* rs;
-        verify<Direct3DException>(device_->CreateRootSignature(
-            0, rsBlob->GetBufferPointer(), rsBlob->GetBufferSize(), IID_PPV_ARGS(&rs)),
-            "Failed to create the ID3D12RootSignature.");
+        if (FAILED(device_->CreateRootSignature(0, rsBlob->GetBufferPointer(), rsBlob->GetBufferSize(), IID_PPV_ARGS(&rs))))
+        {
+            /// LOG
+            throw Direct3DException("Failed to create the ID3D12RootSignature.");
+        }
         rs->SetName(L"RootSignature");
 
         obj = makeComPtr(rs);

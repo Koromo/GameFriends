@@ -34,14 +34,14 @@ private:
     std::vector<Page> shaderPages_;
 
 public:
-    void construct(ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE type);
+    void construct(ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE type) noexcept(false);
     void destruct();
 
     DescriptorHeap() = default;
     DescriptorHeap(const DescriptorHeap&) = delete;
     DescriptorHeap& operator =(const DescriptorHeap&) = delete;
 
-    Descriptor allocate(size_t size, bool shaderVisible);
+    Descriptor allocate(size_t size, bool shaderVisible) noexcept(false);
 
 private:
     Page createNewPage(bool shaderVisivle);
@@ -51,7 +51,7 @@ struct DescriptorAllocator
 {
     D3D12_DESCRIPTOR_HEAP_TYPE type;
     explicit DescriptorAllocator(D3D12_DESCRIPTOR_HEAP_TYPE type_);
-    Descriptor operator ()(size_t size, bool shaderVisible);
+    Descriptor operator ()(size_t size, bool shaderVisible) noexcept(false);
 };
 
 GF_NAMESPACE_END

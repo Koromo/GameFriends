@@ -15,16 +15,26 @@ AudioManager audioManager;
 
 void AudioManager::startup()
 {
-    CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+    if (FAILED(CoInitializeEx(nullptr, COINIT_MULTITHREADED)))
+    {
+        /// LOG
+        throw XAudioError("COM initialization failed.");
+    }
 
     IXAudio2* xAudio;
-    verify<XAudioException>(XAudio2Create(&xAudio),
-        "Failed to create the IXAudio2.");
+    if (FAILED(XAudio2Create(&xAudio)))
+    {
+        /// LOG
+        throw XAudioError("IXAudio2 creation error.");
+    }
     xAudio_ = makeComPtr(xAudio);
 
     IXAudio2MasteringVoice* masteringVoice;
-    verify<XAudioException>(xAudio_->CreateMasteringVoice(&masteringVoice),
-        "Failed to create the IXAudio2MasteringVoice.");
+    if (FAILED(xAudio_->CreateMasteringVoice(&masteringVoice)))
+    {
+        /// LOG
+        throw XAudioError("IXAudio2MasteringVoice creation error.");
+    }
     masteringVoice_ = makeVoicePtr(xAudio_, masteringVoice);
 
     DWORD channelMask;
@@ -37,9 +47,7 @@ void AudioManager::startup()
     deviceDetails_.numSrcCannels = details.InputChannels;
     deviceDetails_.numDestCannels = 2; /// TODO:
 
-    verify<XAudioException>(
-        X3DAudioInitialize(deviceDetails_.channelMask, X3DAUDIO_SPEED_OF_SOUND, x3DAudio_),
-        "Failed to initialize the X3DAudio.");
+    X3DAudioInitialize(deviceDetails_.channelMask, X3DAUDIO_SPEED_OF_SOUND, x3DAudio_);
 
     listener_ = {};
     listenerActive_ = true;

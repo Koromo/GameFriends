@@ -64,7 +64,7 @@ public:
     void parameter(size_t i, std::string& name, MatParamType& type) const;
 
 private:
-    void loadImpl();
+    bool loadImpl();
     void unloadImpl();
 };
 

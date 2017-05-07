@@ -48,7 +48,7 @@ private:
     void setTexture(MatParamType type, const std::string& name, const ResourceInterface<MediaTexture>& texture);
     bool paramCheck(MatParamType type, const std::string& name);
 
-    void loadImpl();
+    bool loadImpl();
     void unloadImpl();
 };
 

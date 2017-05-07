@@ -55,7 +55,7 @@ public:
     }
 
 private:
-    void loadImpl();
+    bool loadImpl();
     void unloadImpl();
 };
 

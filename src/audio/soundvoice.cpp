@@ -9,14 +9,16 @@ SoundVoice::SoundVoice(const ComWeakPtr<IXAudio2>& owner, const SoundFormat& fmt
     , voice_()
 {
     IXAudio2SourceVoice* voice;
-    verify<XAudioException>(owner_.lock()->CreateSourceVoice(&voice, &fmt),
-        "Failed to create the IXAudio2SourceVoice.");
+    if (FAILED(owner_.lock()->CreateSourceVoice(&voice, &fmt)))
+    {
+        /// LOG
+    }
     voice_ = makeVoicePtr(owner_, voice);
 }
 
 void SoundVoice::submitBuffer(const unsigned char* data, size_t size, size_t loops)
 {
-    if (owner_.expired())
+    if (owner_.expired() || !voice_)
     {
         return;
     }
@@ -37,13 +39,15 @@ void SoundVoice::submitBuffer(const unsigned char* data, size_t size, size_t loo
     buffer.LoopCount = loops - 1;
     buffer.pContext = this;
 
-    verify<XAudioException>(voice_->SubmitSourceBuffer(&buffer),
-        "Failed to submit buffers.");
+    if (FAILED(voice_->SubmitSourceBuffer(&buffer)))
+    {
+        /// LOG
+    }
 }
 
 void SoundVoice::start()
 {
-    if (owner_.expired())
+    if (owner_.expired() || !voice_)
     {
         return;
     }
@@ -52,33 +56,43 @@ void SoundVoice::start()
     voice_->GetState(&state);
     if (state.BuffersQueued > 0)
     {
-        verify<XAudioException>(voice_->Start(0),
-            "Failed to start the voice.");
+        if (FAILED(voice_->Start(0)))
+        {
+            /// LOG
+        }
     }
 }
 
 void SoundVoice::stop()
 {
-    if (owner_.expired())
+    if (owner_.expired() || !voice_)
     {
         return;
     }
-    verify<XAudioException>(voice_->Stop(),
-        "Failed to stop the voice.");
+    if (FAILED(voice_->Stop()))
+    {
+        /// LOG
+    }
 }
 
 void SoundVoice::flush()
 {
-    if (owner_.expired())
+    if (owner_.expired() || !voice_)
     {
         return;
     }
-    verify<XAudioException>(voice_->FlushSourceBuffers(),
-        "Failed to flush buffers.");
+    if (FAILED(voice_->FlushSourceBuffers()))
+    {
+        /// LOG
+    }
 }
 
 size_t SoundVoice::numQueuedBuffers()
 {
+    if (owner_.expired() || !voice_)
+    {
+        return 0;
+    }
     XAUDIO2_VOICE_STATE state = {};
     voice_->GetState(&state);
     return state.BuffersQueued;
@@ -86,8 +100,8 @@ size_t SoundVoice::numQueuedBuffers()
 
 float SoundVoice::frequencyRatio()
 {
-    float r = 1;
-    if (!owner_.expired())
+    float r = 0;
+    if (!owner_.expired() && voice_)
     {
         voice_->GetFrequencyRatio(&r);
     }
@@ -96,19 +110,26 @@ float SoundVoice::frequencyRatio()
 
 void SoundVoice::setFrequencyRatio(float ratio)
 {
-    if (owner_.expired())
+    if (owner_.expired() || !voice_)
     {
         return;
     }
-    verify<XAudioException>(voice_->SetFrequencyRatio(ratio),
-        "Failed to apply frequency ratio to the voice.");
+    if (FAILED(voice_->SetFrequencyRatio(ratio)))
+    {
+        /// LOG
+    }
 }
 
 void SoundVoice::setOutputMatrix(size_t numSrcChannels, size_t numDestChannels, const float* levelMatrix)
 {
-    verify<XAudioException>(
-        voice_->SetOutputMatrix(nullptr, numSrcChannels, numDestChannels, levelMatrix),
-        "Failed to set the output matrix.");
+    if (owner_.expired() || !voice_)
+    {
+        return;
+    }
+    if (FAILED(voice_->SetOutputMatrix(nullptr, numSrcChannels, numDestChannels, levelMatrix)))
+    {
+        /// LOG
+    }
 }
 
 GF_NAMESPACE_END

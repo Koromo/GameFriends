@@ -68,8 +68,11 @@ DescriptorHeap::Page DescriptorHeap::createNewPage(bool shaderVisible)
         D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 
     ID3D12DescriptorHeap* heap;
-    verify<Direct3DException>(device_->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&heap)),
-        "Failed to create the ID3D12DescriptorHeap.");
+    if (FAILED(device_->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&heap))))
+    {
+        /// LOG:
+        throw Direct3DException("Failed to create ID3D12DescriptorHeap.");
+    }
     heap->SetName(L"DescriptorHeap");
 
     Page page;

@@ -89,6 +89,7 @@ void InputDevice::showMouseCursor(bool b)
 
 void InputDevice::startup(const std::shared_ptr<Window>& window)
 {
+    /// LOG
     window_ = window;
 
     keyStatus_.fill(false);
@@ -99,6 +100,7 @@ void InputDevice::startup(const std::shared_ptr<Window>& window)
 
 void InputDevice::shutdown()
 {
+    /// LOG
     window_.reset();
 }
 

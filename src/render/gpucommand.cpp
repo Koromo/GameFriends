@@ -6,6 +6,7 @@
 #include "d3dsupport.h"
 #include "foundation/color.h"
 #include "foundation/exception.h"
+#include <string>
 
 GF_NAMESPACE_BEGIN
 
@@ -16,7 +17,10 @@ GpuCommands::GpuCommands(ID3D12CommandAllocator* allocator)
 
 void GpuCommands::reset()
 {
-    verify<Direct3DException>(allocator_->Reset(), "Failed to reset allocator");
+    if (FAILED(allocator_->Reset()))
+    {
+        /// LOG
+    }
 }
 
 ID3D12CommandAllocator& GpuCommands::nativeAllocator()
@@ -26,77 +30,60 @@ ID3D12CommandAllocator& GpuCommands::nativeAllocator()
 
 GpuCommandBuilder::GpuCommandBuilder(ID3D12GraphicsCommandList* list)
     : list_(makeComPtr(list))
-    , closed_(true)
-    , hasCommands_(false)
 {
-}
-
-bool GpuCommandBuilder::hasAnyCommands() const
-{
-    return hasCommands_;
 }
 
 void GpuCommandBuilder::record(GpuCommands& buildTarget)
 {
-    check(closed_);
-    verify<Direct3DException>(list_->Reset(&buildTarget.nativeAllocator(), nullptr),
-        "Failed to reset the command list");
-    closed_ = false;
-    hasCommands_ = false;
+    if (FAILED(list_->Reset(&buildTarget.nativeAllocator(), nullptr)))
+    {
+        /// LOG:
+    }
 }
 
 void GpuCommandBuilder::close()
 {
-    if (!closed_)
+    if (FAILED(list_->Close()))
     {
-        verify<Direct3DException>(list_->Close(),
-            "Failed to close the command list");
-        closed_ = true;
+        /// LOG
     }
 }
 
 void GpuCommandBuilder::clearRenderTarget(PixelBuffer& rt, const Color& clearColor)
 {
     list_->ClearRenderTargetView(rt.renderTargetView().descriptor, reinterpret_cast<const float*>(&clearColor), 0, nullptr);
-    hasCommands_ = true;
 }
 
 void GpuCommandBuilder::clearDepthTarget(PixelBuffer& ds, float depth)
 {
     list_->ClearDepthStencilView(ds.depthTargetView().descriptor, D3D12_CLEAR_FLAG_DEPTH, depth, 0, 0, nullptr);
-    hasCommands_ = true;
 }
 
 void GpuCommandBuilder::triggerDrawCall(const OptimizedDrawCall& drawCall)
 {
     drawCall.trigger(*list_);
-    hasCommands_ = true;
 }
 
 void GpuCommandBuilder::transition(PixelBuffer& resource, PixelBufferState befor, PixelBufferState after)
 {
-    const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(&resource.nativeResource(),
+    const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(resource.nativeResource(),
         D3DMappings::RESOURCE_STATES(befor), D3DMappings::RESOURCE_STATES(after));
     list_->ResourceBarrier(1, &barrier);
-    hasCommands_ = true;
 }
 
 void GpuCommandBuilder::uploadVertices(VertexData& vertexData)
 {
     vertexData.upload(*list_);
-    hasCommands_ = true;
 }
 
 void GpuCommandBuilder::drawableState(VertexData& vertexData)
 {
-    const auto b = vertexData.drawableState(*list_);
-    hasCommands_ = (hasCommands_ || b);
+    vertexData.drawableState(*list_);
 }
 
 void GpuCommandBuilder::uploadPixels(const PixelUpload& pixels, PixelBuffer& buffer)
 {
     buffer.upload(*list_, pixels);
-    hasCommands_ = true;
 }
 
 ID3D12GraphicsCommandList& GpuCommandBuilder::nativeList()
@@ -108,14 +95,18 @@ void GpuCommandExecuter::construct(ID3D12Device* device, GpuCommandType type)
 {
     device_ = device;
     type_ = D3DMappings::COMMAND_LIST_TYPE(type);
+    const auto typeNumber = std::to_string(type_);
 
     D3D12_COMMAND_QUEUE_DESC queueDesc = {};
     queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
     queueDesc.Type = type_;
 
     ID3D12CommandQueue* commandQueue;
-    verify<Direct3DException>(device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&commandQueue)),
-        "Failed to create the ID3D12CommandQueue.");
+    if (FAILED(device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&commandQueue))))
+    {
+        /// LOG
+        throw Direct3DError("ID3D12CommandQueue (type " + typeNumber + ") creation failed.");
+    }
     commandQueue->SetName(L"CommandQueue");
     commandQueue_ = makeComPtr(commandQueue);
 
@@ -123,15 +114,20 @@ void GpuCommandExecuter::construct(ID3D12Device* device, GpuCommandType type)
     currentFenceValue_ = 1;
 
     ID3D12Fence* fence;
-    verify<Direct3DException>(
-        device_->CreateFence(currentFenceValue_, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)),
-        "Feiled to create the fence.");
+    if (FAILED(device_->CreateFence(currentFenceValue_, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence))))
+    {
+        /// LOG
+        throw Direct3DError("ID3D12Fence creation failed.");
+    }
     fence->SetName(L"Fence");
     fence_ = makeComPtr(fence);
 
     ID3D12CommandAllocator* allocator;
-    verify<Direct3DException>(device->CreateCommandAllocator(type_, IID_PPV_ARGS(&allocator)),
-        "Failed to create the ID3D12CommandAllocator");
+    if (FAILED(device->CreateCommandAllocator(type_, IID_PPV_ARGS(&allocator))))
+    {
+        /// LOG
+        throw Direct3DError("GpuCommandExecuter initialization failed.");
+    }
     allocator->SetName(L"DefaultCommandAllocator");
     defaultAllocator_ = makeComPtr(allocator);
 }
@@ -148,8 +144,11 @@ void GpuCommandExecuter::destruct()
 std::shared_ptr<GpuCommands> GpuCommandExecuter::createCommands()
 {
     ID3D12CommandAllocator* allocator;
-    verify<Direct3DException>(device_->CreateCommandAllocator(type_, IID_PPV_ARGS(&allocator)),
-        "Failed to create the ID3D12CommandAllocator");
+    if (FAILED(device_->CreateCommandAllocator(type_, IID_PPV_ARGS(&allocator))))
+    {
+        /// LOG:
+        throw Direct3DException("Failed to create the ID3D12CommandAllocator.");
+    }
     allocator->SetName(L"CommandAllocator");
 
     return std::make_shared<GpuCommands>(allocator);
@@ -158,8 +157,11 @@ std::shared_ptr<GpuCommands> GpuCommandExecuter::createCommands()
 std::shared_ptr<GpuCommandBuilder> GpuCommandExecuter::createBuilder()
 {
     ID3D12GraphicsCommandList* list;
-    verify<Direct3DException>(device_->CreateCommandList(0, type_, defaultAllocator_.get(), nullptr, IID_PPV_ARGS(&list)),
-        "Failed to create the ID3D12GraphicsCommandList.");
+    if (FAILED(device_->CreateCommandList(0, type_, defaultAllocator_.get(), nullptr, IID_PPV_ARGS(&list))))
+    {
+        /// LOG
+        throw Direct3DException("Failed to create the ID3D12GraphicsCommandList.");
+    }
     list->SetName(L"CommandList");
     list->Close();
 
@@ -168,14 +170,13 @@ std::shared_ptr<GpuCommandBuilder> GpuCommandExecuter::createBuilder()
 
 FenceValue GpuCommandExecuter::execute(GpuCommandBuilder& builder)
 {
-    builder.close();
+    const auto list = &builder.nativeList();
+    commandQueue_->ExecuteCommandLists(1, CommandListCast(&list));
+    ++currentFenceValue_;
 
-    if (builder.hasAnyCommands())
+    if (FAILED(commandQueue_->Signal(fence_.get(), currentFenceValue_)))
     {
-        const auto list = &builder.nativeList();
-        commandQueue_->ExecuteCommandLists(1, CommandListCast(&list));
-        ++currentFenceValue_;
-        verify<Direct3DException>(commandQueue_->Signal(fence_.get(), currentFenceValue_), "Failed to Signal");
+        /// LOG
     }
 
     return currentFenceValue_;

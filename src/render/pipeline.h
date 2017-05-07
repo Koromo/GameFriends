@@ -10,7 +10,7 @@ GF_NAMESPACE_BEGIN
 
 struct GraphicsPipelineStateObtain
 {
-    ID3D12PipelineState& operator ()(const D3D12_GRAPHICS_PIPELINE_STATE_DESC& desc);
+    ID3D12PipelineState& operator ()(const D3D12_GRAPHICS_PIPELINE_STATE_DESC& desc) noexcept(false);
 };
 
 struct GraphicsPipelineStateCache
@@ -27,7 +27,7 @@ public:
     GraphicsPipelineStateCache(const GraphicsPipelineStateCache&) = delete;
     GraphicsPipelineStateCache& operator=(const GraphicsPipelineStateCache&) = delete;
 
-    ID3D12PipelineState& obtain(const D3D12_GRAPHICS_PIPELINE_STATE_DESC& key);
+    ID3D12PipelineState& obtain(const D3D12_GRAPHICS_PIPELINE_STATE_DESC& key) noexcept(false);
 };
 
 GF_NAMESPACE_END

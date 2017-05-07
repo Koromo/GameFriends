@@ -23,7 +23,7 @@ public:
     PixelBuffer& resource();
 
 private:
-    void loadImpl();
+    bool loadImpl();
     void unloadImpl();
 };
 

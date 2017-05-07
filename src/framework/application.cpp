@@ -38,6 +38,7 @@ namespace
 void Application::go()
 {
     /* Initialize */
+    /// LOG
 
     setup_.clientWidth = 640;
     setup_.clientHeight = 480;
@@ -46,7 +47,44 @@ void Application::go()
 
     startup();
 
-    window = std::make_shared<Window>(setup_.clientWidth, setup_.clientHeight, widen(setup_.title), windowProc);
+    const auto inst = GetModuleHandle(NULL);
+
+    WNDCLASSEX wc;
+    wc.cbSize = sizeof(wc);
+    wc.style = 0;
+    wc.cbClsExtra = 0;
+    wc.cbWndExtra = 0;
+    wc.hInstance = inst;
+    wc.lpfnWndProc = windowProc;
+    wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+    wc.hIconSm = NULL;
+    wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+    wc.hbrBackground = static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH));
+    wc.lpszMenuName = NULL;
+    wc.lpszClassName = widen(setup_.title).c_str();
+
+    if (FAILED(RegisterClassEx(&wc)))
+    {
+        /// LOG
+        throw WindowsException("Window class register failed.");
+    }
+
+    const auto style = WS_OVERLAPPEDWINDOW & ~WS_THICKFRAME & ~WS_MAXIMIZEBOX;
+    RECT rect = { 0, 0, static_cast<LONG>(setup_.clientWidth), static_cast<LONG>(setup_.clientHeight) };
+    AdjustWindowRect(&rect, style, false);
+
+    const auto windowWidth = rect.right - rect.left;
+    const auto windowHeight = rect.bottom - rect.top;
+    const auto windowHandle = CreateWindow(wc.lpszClassName, wc.lpszClassName, style, CW_USEDEFAULT, CW_USEDEFAULT,
+        windowWidth, windowHeight, NULL, NULL, inst, NULL);
+
+    if (windowHandle == NULL)
+    {
+        /// LOG
+        throw WindowsException("Window class creation failed.");
+    }
+
+    window = std::make_shared<Window>(windowHandle, setup_.clientWidth, setup_.clientHeight);
     setFrameRate(setup_.frameRate);
 
     for (int i = 0; i < MAX_FRAME_RATE; ++i)
@@ -56,6 +94,7 @@ void Application::go()
 
     // Resource
     fileSystem.startup("media");
+    resourceManager.startup();
 
     // Audio
     audioManager.startup();
@@ -74,9 +113,10 @@ void Application::go()
 
     // Physics
 
-
     // Input
     inputDevice.startup(window);
+
+    /// LOG
 
     /* Game loop */
 
@@ -130,6 +170,7 @@ void Application::go()
     window->show(false);
 
     /* Finalize */
+    /// LOG
 
     shutdown();
 
@@ -152,10 +193,12 @@ void Application::go()
     audioManager.shutdown();
 
     // Resource
-    resourceTable.clear();
+    resourceManager.shutdown();
     fileSystem.shutdown();
 
     window.reset();
+
+    /// LOG
 }
 
 void Application::quit()

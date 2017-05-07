@@ -24,7 +24,7 @@ public:
     const SoundFormat& format() const;
 
 private:
-    void loadImpl();
+    bool loadImpl();
     void unloadImpl();
 };
 

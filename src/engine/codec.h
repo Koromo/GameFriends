@@ -2,7 +2,6 @@
 #define GAMEFRIENDS_CODEC_H
 
 #include "pixelformat.h"
-#include "foundation/exception.h"
 #include "foundation/prerequest.h"
 #include <memory>
 #include <string>
@@ -29,13 +28,7 @@ public:
     const Pixel_RGBA8_uint* pixelArray() const;
 };
 
-class CodecException : public FileException
-{
-public:
-    explicit CodecException(const std::string& msg) : FileException(msg) {}
-};
-
-std::shared_ptr<Image> decodeBmp(const std::string& path);
+std::shared_ptr<Image> decodeBmp(const std::string& path) noexcept(false);
 
 GF_NAMESPACE_END
 

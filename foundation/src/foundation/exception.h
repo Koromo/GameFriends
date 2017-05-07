@@ -36,7 +36,7 @@ private:
     std::string msg_;
 
 public:
-    explicit Exception(const std::string& msg = "")
+    explicit Exception(const std::string& msg)
         : msg_(msg) {}
 
     std::string msg() const { return msg_; }
@@ -49,7 +49,7 @@ private:
     std::string msg_;
 
 public:
-    explicit Error(const std::string& msg = "")
+    explicit Error(const std::string& msg)
         : msg_(msg) {}
 
     std::string msg() const { return msg_; }
@@ -59,14 +59,14 @@ public:
 class EnforceError : public Error
 {
 public:
-    explicit EnforceError(const std::string& msg = "")
+    explicit EnforceError(const std::string& msg)
         : Error(msg) {}
 };
 
 class FileException : public Exception
 {
 public:
-    explicit FileException(const std::string& msg = "")
+    explicit FileException(const std::string& msg)
         : Exception(msg) {}
 };
 

@@ -4,14 +4,16 @@
 
 GF_NAMESPACE_BEGIN
 
-void SoundClip::loadImpl()
+bool SoundClip::loadImpl()
 {
     const auto tpath = charset(path().os);
 
-    const auto mmio = enforce<FileException>(
-        mmioOpen(const_cast<TCHAR*>(tpath.c_str()), nullptr, MMIO_READ),
-        "File not found (" + path().os + ")."
-        );
+    const auto mmio = mmioOpen(const_cast<TCHAR*>(tpath.c_str()), nullptr, MMIO_READ);
+    if (!mmio)
+    {
+        /// LOG
+        return false;
+    }
     GF_SCOPE_EXIT{ mmioClose(mmio, 0); };
 
     MMRESULT mr;
@@ -42,6 +44,8 @@ void SoundClip::loadImpl()
     size_ = dataChunk.cksize;
     readSize = mmioRead(mmio, data, dataChunk.cksize);
     check(readSize == dataChunk.cksize);
+
+    return true;
 }
 
 void SoundClip::unloadImpl()

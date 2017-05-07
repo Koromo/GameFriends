@@ -40,13 +40,10 @@ class GpuCommandBuilder
 {
 private:
     ComPtr<ID3D12GraphicsCommandList> list_;
-    bool closed_;
-    bool hasCommands_;
 
 public:
     explicit GpuCommandBuilder(ID3D12GraphicsCommandList* list);
 
-    bool hasAnyCommands() const;
     void record(GpuCommands& buildTarget);
     void close();
 
@@ -83,15 +80,15 @@ private:
     ComPtr<ID3D12CommandAllocator> defaultAllocator_;
 
 public:
-    void construct(ID3D12Device* device, GpuCommandType type);
+    void construct(ID3D12Device* device, GpuCommandType type) noexcept(false);
     void destruct();
 
     GpuCommandExecuter() = default;
     GpuCommandExecuter(const GpuCommandExecuter&) = delete;
     GpuCommandExecuter& operator =(const GpuCommandExecuter&) = delete;
 
-    std::shared_ptr<GpuCommands> createCommands();
-    std::shared_ptr<GpuCommandBuilder> createBuilder();
+    std::shared_ptr<GpuCommands> createCommands() noexcept(false);
+    std::shared_ptr<GpuCommandBuilder> createBuilder() noexcept(false);
 
     FenceValue execute(GpuCommandBuilder& builder);
     bool fenceCompleted(FenceValue val) const;

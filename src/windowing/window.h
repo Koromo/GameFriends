@@ -12,20 +12,23 @@ GF_NAMESPACE_BEGIN
 class Window
 {
 private:
-    struct HCloser { void operator()(HWND h) { DestroyWindow(h); } };
-    std::unique_ptr<std::remove_pointer_t<HWND>, HCloser> handle_;
+    HWND handle_;
     size_t clientWidth_;
     size_t clientHeight_;
 
 public:
-    Window(size_t w, size_t h, const string_t& title, WNDPROC proc);
+    Window(HWND handle, size_t w, size_t h);
+
     HWND handle();
+
     size_t clientWidth() const;
     size_t clientHeight() const;
+
     size_t toScreenX(size_t clientX) const;
     size_t toScreenY(size_t clientY) const;
     size_t toClientX(size_t screenX) const;
     size_t toClientY(size_t screenY) const;
+
     void show(bool b);
 };
 

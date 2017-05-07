@@ -7,8 +7,60 @@
 #include <memory>
 #include <unordered_map>
 #include <utility>
+#include <string>
 
 GF_NAMESPACE_BEGIN
+
+class ResourceException : public FileException
+{
+public:
+    explicit ResourceException(const std::string& msg)
+        : FileException(msg) {}
+};
+
+class CodecException : public ResourceException
+{
+public:
+    explicit CodecException(const std::string& msg)
+        : ResourceException(msg) {}
+};
+
+class MeshLoadException : public ResourceException
+{
+public:
+    explicit MeshLoadException(const std::string& msg)
+        : ResourceException(msg) {}
+};
+
+class TextureLoadException : public ResourceException
+{
+public:
+    explicit TextureLoadException(const std::string& msg)
+        : ResourceException(msg) {}
+};
+
+class MaterialLoadException : public ResourceException
+{
+public:
+    explicit MaterialLoadException(const std::string& msg)
+        : ResourceException(msg) {}
+};
+
+class ShadeModelLoadException : public ResourceException
+{
+public:
+    explicit ShadeModelLoadException(const std::string& msg)
+        : ResourceException(msg) {}
+};
+
+/*
+class SoundLoadException : public ResourceException
+{
+public:
+    explicit SoundLoadException(const std::string& msg)
+        : ResourceException(msg) {}
+};
+*/
 
 class Resource
 {
@@ -26,7 +78,7 @@ public:
     void unload();
 
 private:
-    virtual void loadImpl() = 0;
+    virtual bool loadImpl() = 0;
     virtual void unloadImpl() = 0;
 };
 
@@ -123,13 +175,15 @@ public:
     }
 };
 
-/// TODO: Not suppoted to const resources
-class ResourceTable
+class ResourceManager
 {
 private:
     std::unordered_map<FilePath, std::shared_ptr<Resource>> resourceMap_;
 
 public:
+    void startup();
+    void shutdown();
+
     template <class T, class... Args>
     ResourceInterface<T> create(const FilePath& path, Args&&... args)
     {
@@ -189,7 +243,7 @@ public:
     void clear();
 };
 
-extern ResourceTable resourceTable;
+extern ResourceManager resourceManager;
 
 GF_NAMESPACE_END
 

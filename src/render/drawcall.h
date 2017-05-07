@@ -57,7 +57,6 @@ public:
     void setDepthTarget(PixelBuffer& dt);
     void setViewport(const Viewport& vp);
 
-    void prepare(ID3D12GraphicsCommandList& list) const;
     void trigger(ID3D12GraphicsCommandList& list) const;
 
 private:

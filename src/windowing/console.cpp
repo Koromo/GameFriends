@@ -16,7 +16,10 @@ void Console::allocate()
 {
     if (!inHandle_)
     {
-        enforce<WindowsException>(AllocConsole(), "Failed to allocate the console.");
+        if (!AllocConsole())
+        {
+            /// LOG
+        }
         inHandle_ = GetStdHandle(STD_INPUT_HANDLE);
         outHandle_ = GetStdHandle(STD_OUTPUT_HANDLE);
     }
@@ -31,16 +34,31 @@ void Console::free()
 
 string_t Console::readLine()
 {
+    if (inHandle_ == NULL)
+    {
+        return GF_T("");
+    }
+
     DWORD numReads;
-    const auto success = ReadConsole(inHandle_, buffer_, BUFFER_SIZE - 1, &numReads, NULL);
-    /// TODO: numReads - 2, failed case
+    if (!ReadConsole(inHandle_, buffer_, BUFFER_SIZE - 1, &numReads, NULL))
+    {
+        /// LOG
+    }
     buffer_[numReads - 2] = GF_T('\0');
     return buffer_;
 }
 
 void Console::write(const char_t* str)
 {
-    WriteConsole(outHandle_, str, static_cast<DWORD>(strlen(str)), NULL, NULL);
+    if (outHandle_ == NULL)
+    {
+        return;
+    }
+
+    if (!WriteConsole(outHandle_, str, static_cast<DWORD>(strlen(str)), NULL, NULL))
+    {
+        /// LOG
+    }
 }
 
 void Console::writef(const char_t* fmt, ...)

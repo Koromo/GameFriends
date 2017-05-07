@@ -30,9 +30,13 @@ void VertexData::setVertices(const std::string& semantics, size_t index, const v
     const auto desc = CD3DX12_RESOURCE_DESC::Buffer(size);
 
     ID3D12Resource* buffer;
-    verify<Direct3DException>(renderSystem.nativeDevice().CreateCommittedResource(
-        &defaultHeap, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&buffer)),
-        "Failed to create the ID3D12Resource.");
+    if (FAILED(renderSystem.nativeDevice().CreateCommittedResource(&defaultHeap, D3D12_HEAP_FLAG_NONE, &desc,
+        D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&buffer))))
+    {
+        /// LOG
+        vertices_.erase(found);
+        return;
+    }
     buffer->SetName(L"VertexBuffer");
 
     found->buffer = makeComPtr(buffer);
@@ -75,9 +79,13 @@ void VertexData::setIndices(const unsigned short* data, size_t size)
     const auto desc = CD3DX12_RESOURCE_DESC::Buffer(size);
 
     ID3D12Resource* buffer;
-    verify<Direct3DException>(renderSystem.nativeDevice().CreateCommittedResource(
-        &defaultHeap, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&buffer)),
-        "Failed to create the ID3D12Resource.");
+    if (FAILED(renderSystem.nativeDevice().CreateCommittedResource(&defaultHeap, D3D12_HEAP_FLAG_NONE, &desc,
+        D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&buffer))))
+    {
+        /// LOG
+        indices_ = {};
+        return;
+    }
     buffer->SetName(L"IndexBuffer");
 
     indices_.buffer = makeComPtr(buffer);
@@ -136,7 +144,10 @@ void VertexData::upload(ID3D12GraphicsCommandList& list)
             srcData.SlicePitch = srcData.RowPitch;
 
             const auto uploadedSize = UpdateSubresources<1>(&list, u.dest, intermediate.resource, intermediate.offset, 0, 1, &srcData);
-            check(uploadedSize == u.srcSize);
+            if (uploadedSize != u.srcSize)
+            {
+                /// LOG
+            }
 
             barriers_.emplace_back(CD3DX12_RESOURCE_BARRIER::Transition(u.dest, D3D12_RESOURCE_STATE_COPY_DEST, u.afterState));
 
@@ -145,15 +156,13 @@ void VertexData::upload(ID3D12GraphicsCommandList& list)
     }
 }
 
-bool VertexData::drawableState(ID3D12GraphicsCommandList& list)
+void VertexData::drawableState(ID3D12GraphicsCommandList& list)
 {
     if (!barriers_.empty())
     {
         list.ResourceBarrier(barriers_.size(), barriers_.data());
         barriers_.clear();
-        return true;
     }
-    return false;
 }
 
 D3D12_INDEX_BUFFER_VIEW VertexData::indexBuffer() const
