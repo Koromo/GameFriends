@@ -8,17 +8,17 @@ const float PI_2 = PI / 2;
 const float PI_4 = PI / 4;
 const float EPSILON = 0.0001f;
 
-float radian(float deg)
+float radian(float deg) noexcept
 {
     return deg * PI / 180;
 }
 
-float degree(float rad)
+float degree(float rad) noexcept
 {
     return rad * 180 / PI;
 }
 
-bool equalf(float a, float b)
+bool equalf(float a, float b) noexcept
 {
     return std::abs(a - b) < EPSILON;
 }
@@ -93,9 +93,9 @@ namespace
     };
 }
 
-unsigned crc32(const void* p, size_t length)
+unsigned crc32(const void* p, size_t length) noexcept
 {
-    const char* ptr = reinterpret_cast<const char*>(p);
+    const int8* ptr = reinterpret_cast<const int8*>(p);
     unsigned c = 0xFFFFFFFF;
     for (size_t i = 0; i < length; i++) {
         c = crc32Table[(c ^ ptr[i]) & 0xFF] ^ (c >> 8);

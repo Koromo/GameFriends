@@ -83,7 +83,7 @@ namespace
             if (line[p] == '\"')
             {
                 const auto q = line.find('\"', p + 1);
-                check(q != std::string::npos);
+                enforce<InvalidMetaPropFile>(q != std::string::npos, "Unexpected systax at line " + std::to_string(currentLine) + " in " + context.path + ".");
                 if (p + 1 == q)
                 {
                     context.tokens.emplace(Token{ "", currentLine });
@@ -158,6 +158,8 @@ void MetaPropFile::read(const std::string& path)
 
             // Create new current group
             const auto groupName = tokens[0];
+            enforce<InvalidMetaPropFile>(groupName.length() > 1, "Invalid group name \"" + groupName + "\" in " + context.path + ".");
+
             currentGroup = MetaPropGroup();
             currentGroup.setName(groupName.substr(1));
             groupNow = true;
@@ -165,9 +167,11 @@ void MetaPropFile::read(const std::string& path)
         else
         {
             // New property
-            check(tokens[0].back() == ':');
+            enforce<InvalidMetaPropFile>(tokens[0].back() == ':', "Unexpected systax \"" +  tokens[0] + "\" in " + context.path + ".");
 
             const auto propName = tokens[0];
+            enforce<InvalidMetaPropFile>(propName.length() > 1, "Invalid property name \"" + propName + "\" in " + context.path + ".");
+
             MetaProperty prop;
             prop.setName(propName.substr(0, propName.length() - 1));
 
@@ -199,7 +203,7 @@ void MetaPropFile::read(const std::string& path)
 void MetaPropFile::write(const std::string& path)
 {
     std::ofstream stream(path, std::ios_base::out | std::ios_base::trunc);
-    enforce<FileException>(stream.is_open(), "File open error (" + path + ").");
+    enforce<FileException>(stream.is_open(), "Failed open file (" + path + ").");
 
     stream << "@_Header\nAuther: " + inText(auther_) + "\nComment: " + inText(comment_) + "\n";
     for (const auto& g : groupTable_)
@@ -306,7 +310,6 @@ long double MetaProperty::getLDouble(size_t i) const
 {
     return std::stoi(this->operator[](i));
 }
-
 
 size_t MetaProperty::size() const
 {

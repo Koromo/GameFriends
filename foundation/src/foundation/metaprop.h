@@ -2,11 +2,19 @@
 #define GAMEFRIENDS_METAPROP_H
 
 #include "prerequest.h"
+#include "exception.h"
 #include <string>
 #include <unordered_map>
 #include <vector>
 
 GF_NAMESPACE_BEGIN
+
+class InvalidMetaPropFile : FileException
+{
+public:
+    explicit InvalidMetaPropFile(const std::string& msg)
+        : FileException(msg) {}
+};
 
 class MetaProperty
 {
@@ -76,15 +84,14 @@ public:
     std::string comment() const;
 
     void setAuther(const std::string& auther);
-    void setDate(const std::string& date);
     void setComment(const std::string& comment);
 
     bool hasGroup(const std::string& name) const;
     const MetaPropGroup& group(const std::string& name) const;
     void addGroup(const MetaPropGroup& group);
 
-    void read(const std::string& path);
-    void write(const std::string& path);
+    void read(const std::string& path) noexcept(false);
+    void write(const std::string& path) noexcept(false);
 };
 
 GF_NAMESPACE_END

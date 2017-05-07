@@ -3,6 +3,7 @@
 #include "math.h"
 #include "vector3.h"
 #include "vector4.h"
+#include "exception.h"
 #include <algorithm>
 #include <array>
 #include <cfloat>
@@ -35,6 +36,7 @@ AxisAlignedBox AxisAlignedBox::transform(const Matrix44& m) const
     for (int i = 0; i < 8; ++i)
     {
         const auto v = corner(i).xyzw(1) * m;
+        check(!equalf(v.w, 0)); /// TODO: Infinite AABB ?
         result.merge(v.xyz() / v.w);
     }
     return result;

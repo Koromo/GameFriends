@@ -14,19 +14,4 @@ detail::ScopeExit::~ScopeExit()
     fun_();
 }
 
-Exception::Exception(const std::string& msg)
-    : msg_(msg)
-{
-}
-
-std::string Exception::msg() const
-{
-    return msg_;
-}
-
-const char* Exception::what() const
-{
-    return msg_.c_str();
-}
-
 GF_NAMESPACE_END

@@ -1,4 +1,5 @@
 #include "plane.h"
+#include "exception.h"
 #include "math.h"
 #include <cmath>
 
@@ -32,6 +33,7 @@ float Plane::intersects(const Vector3& origin, const Vector3& dir) const
 
 void Plane::normalize()
 {
+    check(!equalf(n.norm(), 0));
     const auto k = 1 / n.norm();
     *this = { n * k, d * k };
 }

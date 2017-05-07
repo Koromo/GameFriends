@@ -27,10 +27,9 @@ float& Vector2::operator [](size_t i)
     {
     case 0: return x;
     case 1: return y;
-    default:
-        check(false);
-        return x;
     }
+    check(false);
+    return x;
 }
 
 float Vector2::norm() const
@@ -50,7 +49,6 @@ Vector3 Vector2::xyz(float z) const
 
 void Vector2::normalize()
 {
-    check(!equalf(norm(), 0));
     *this /= norm();
 }
 
@@ -126,7 +124,6 @@ Vector2& operator *=(Vector2& v, float k)
 
 Vector2& operator /=(Vector2& v, float k)
 {
-    check(!equalf(k, 0));
     v = v / k;
     return v;
 }

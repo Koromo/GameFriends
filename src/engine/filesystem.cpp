@@ -72,7 +72,7 @@ std::string FileSystem::standard(const std::string& path) const
     }
 
     const auto beginOffset = p;
-    while (p < s.length())
+    while (p < static_cast<int>(s.length()))
     {
         if (s[p] == '/')
         {
@@ -138,7 +138,7 @@ std::string FileSystem::toRelativePath(const std::string& path) const
     const auto stdPathSlash = standard(path) + '/';
     const auto osRootPathSlash = osRootPath_ + '/';
     int diffAt = 0;
-    for (int p = 0; p < stdPathSlash.length() && p < osRootPathSlash.length() &&
+    for (size_t p = 0; p < stdPathSlash.length() && p < osRootPathSlash.length() &&
         stdPathSlash[p] == osRootPathSlash[p]; ++p)
     {
         if (osRootPathSlash[p] == '/')
@@ -148,7 +148,7 @@ std::string FileSystem::toRelativePath(const std::string& path) const
     }
 
     int back = 0;
-    for (int p = diffAt + 1; p < osRootPathSlash.length(); ++p)
+    for (size_t p = diffAt + 1; p < osRootPathSlash.length(); ++p)
     {
         back += osRootPathSlash[p] == '/';
     }

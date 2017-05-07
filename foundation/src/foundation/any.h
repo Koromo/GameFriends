@@ -11,10 +11,11 @@
 
 GF_NAMESPACE_BEGIN
 
-class BadAnyCast : public Exception
+class AnyCastError : public Exception
 {
 public:
-    explicit BadAnyCast(const std::string& msg) : Exception(msg) {}
+    explicit AnyCastError(const std::string& msg = "")
+        : Exception(msg) {}
 };
 
 class Any
@@ -142,14 +143,14 @@ const T* to(const Any* any)
 }
 
 template <class T>
-T& to(Any& any)
+T& to(Any& any) noexcept(false)
 {
-    auto p = enforce<BadAnyCast>(to<T>(&any), "Invalid cast.");
+    auto p = enforce<AnyCastError>(to<T>(&any));
     return *p;
 }
 
 template <class T>
-const T& to(const Any& any)
+const T& to(const Any& any) noexcept(false)
 {
     return to<T>(const_cast<Any&>(any));
 }

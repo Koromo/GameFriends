@@ -69,7 +69,6 @@ Vector4 Vector3::xyzw(float w) const
 
 void Vector3::normalize()
 {
-    check(!equalf(norm(), 0));
     *this /= norm();
 }
 
@@ -156,7 +155,6 @@ Vector3& operator *=(Vector3& v, float k)
 
 Vector3& operator /=(Vector3& v, float k)
 {
-    check(!equalf(k, 0));
     v = v / k;
     return v;
 }

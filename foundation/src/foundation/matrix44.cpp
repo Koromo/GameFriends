@@ -268,7 +268,6 @@ Matrix44& operator *=(Matrix44& m, float k)
 
 Matrix44& operator /=(Matrix44& m, float k)
 {
-    check(!equalf(k, 0));
     m = m / k;
     return m;
 }
@@ -313,7 +312,7 @@ Matrix44 makePerspectiveMatrix(float fovY, float aspect, float zn, float zf)
 {
     check(fovY >= 0);
     check(aspect > 0);
-    check(zn <= zf);
+    check(zn < zf);
 
     const auto h = 1 / std::tan(fovY * 0.5f);
     const auto w = h / aspect;
@@ -331,7 +330,7 @@ Matrix44 makeOrthoMatrix(float width, float height, float zn, float zf)
 {
     check(width > 0);
     check(height > 0);
-    check(zn <= zf);
+    check(zn < zf);
     return{
         2 / width, 0, 0, 0,
         0, 2 / height, 0, 0,
@@ -342,9 +341,9 @@ Matrix44 makeOrthoMatrix(float width, float height, float zn, float zf)
 
 Matrix44 makeOrthoMatrix(float left, float right, float bottom, float top, float zn, float zf)
 {
-    check(left <= right);
-    check(bottom <= top);
-    check(zn <= zf);
+    check(left < right);
+    check(bottom < top);
+    check(zn < zf);
     return{
         2 / (right - left), 0, 0, 0,
         0, 2 / (top - bottom), 0, 0,

@@ -8,14 +8,14 @@
 #include <functional>
 #include <cassert>
 
+#define check(e) (assert(e && #e))
+#define static_check(e) (static_assert(e, #e)) /** BUGS: STATIC_CHECK_BUG */
+
 #define GF_SCOPE_EXIT_NAME(id) GF_CAT(gf_scope_exit_, id)
 
 #define GF_SCOPE_EXIT \
     const GF_NAMESPACE::detail::ScopeExit GF_SCOPE_EXIT_NAME(GF_ID) = \
         GF_NAMESPACE::detail::ScopeExit::relay = [&]
-
-#define check(e) (assert(e && #e))
-#define static_check(e) (static_assert(e, #e)) /** BUGS: STATIC_CHECK_BUG */
 
 GF_NAMESPACE_BEGIN
 
@@ -30,8 +30,48 @@ namespace detail
     };
 }
 
-template <class E, class T, class... Args>
-T enforce(T&& value, Args&&... args)
+class Exception : public std::exception
+{
+private:
+    std::string msg_;
+
+public:
+    explicit Exception(const std::string& msg = "")
+        : msg_(msg) {}
+
+    std::string msg() const { return msg_; }
+    const char* what() const { return msg_.c_str(); }
+};
+
+class Error : public std::exception
+{
+private:
+    std::string msg_;
+
+public:
+    explicit Error(const std::string& msg = "")
+        : msg_(msg) {}
+
+    std::string msg() const { return msg_; }
+    const char* what() const { return msg_.c_str(); }
+};
+
+class EnforceError : public Error
+{
+public:
+    explicit EnforceError(const std::string& msg = "")
+        : Error(msg) {}
+};
+
+class FileException : public Exception
+{
+public:
+    explicit FileException(const std::string& msg = "")
+        : Exception(msg) {}
+};
+
+template <class E = EnforceError, class T, class... Args>
+T enforce(T&& value, Args&&... args) noexcept(false)
 {
     if (!value)
     {
@@ -39,24 +79,6 @@ T enforce(T&& value, Args&&... args)
     }
     return std::forward<T>(value);
 }
-
-class Exception : public std::exception
-{
-private:
-    std::string msg_;
-
-public:
-    explicit Exception(const std::string& msg);
-    std::string msg() const;
-    const char* what() const;
-};
-
-class FileException : public Exception
-{
-public:
-    explicit FileException(const std::string& msg)
-        : Exception(msg) {}
-};
 
 GF_NAMESPACE_END
 

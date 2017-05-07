@@ -128,7 +128,7 @@ void VertexData::upload(ID3D12GraphicsCommandList& list)
         for (auto& u : uploads)
         {
             const auto intermediateSize = GetRequiredIntermediateSize(u.dest, 0, 1);
-            const auto intermediate = CpuAllocator()(intermediateSize, sizeof(float));
+            const auto intermediate = CpuAllocator()(static_cast<size_t>(intermediateSize), sizeof(float));
 
             D3D12_SUBRESOURCE_DATA srcData = {};
             srcData.pData = u.srcData.get();

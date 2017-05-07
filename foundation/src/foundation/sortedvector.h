@@ -1,6 +1,7 @@
 #ifndef GAMEFRIENDS_SORTEDVECTOR_H
 #define GAMEFRIENDS_SORTEDVECTOR_H
 
+#include "exception.h"
 #include "prerequest.h"
 #include <vector>
 #include <initializer_list>
@@ -154,6 +155,7 @@ public:
     template <class InputIterator>
     void insert(InputIterator first, InputIterator last)
     {
+        check(last - first >= 0);
         vec_.reserve(vec_.size() + (last - first));
         while (first != last)
         {
