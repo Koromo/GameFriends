@@ -126,7 +126,7 @@ void MetaPropFile::read(const std::string& path)
     *this = MetaPropFile();
 
     std::ifstream stream(path);
-    enforce<FileException>(stream.is_open(), "File not found (" + path + ").");
+    enforce<FileException>(stream.is_open(), "Failed to open file (" + path + ").");
 
     Context context = {};
     context.path = path;
