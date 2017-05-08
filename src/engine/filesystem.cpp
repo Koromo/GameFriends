@@ -65,64 +65,76 @@ void FileSystem::shutdown()
 
 std::string FileSystem::standard(const std::string& path) const
 {
+    if (path.empty())
+    {
+        return "";
+    }
+
     auto s = tolowers(path);
     for (auto p = s.find("\\"); p != std::string::npos; p = s.find("\\", p + 1))
     {
         s.replace(p, 1, "/");
     }
-
-    const auto isOS = isOSPath(s);
-    std::string stdPath;
-    int p = 0;
-
-    if (isOS)
+    for (auto p = s.find("//"); p != std::string::npos; p = s.find("//", p))
     {
-        p = 3;
-        stdPath = s.substr(0, 3);
+        s.replace(p, 1, "/");
     }
 
-    const auto beginOffset = p;
-    while (p < static_cast<int>(s.length()))
+    std::string prefix;
+    if (isOSPath(s))
     {
-        if (s[p] == '/')
+        if (s[0] == '/')
         {
-            p += 1;
-        }
-        else if (s[p] == '.' && s[p + 1] == '/')
-        {
-            p += 2;
-        }
-        else if (s[p] == '.' && s[p + 1] == '.')
-        {
-            //check(s[p + 2] == '/');
-            const auto q = stdPath.rfind('/');
-            if (q != std::string::npos)
-            {
-                stdPath.erase(q + 1);
-            }
-            p += 3;
+            prefix = s[0];
+            s.erase(0, 1);
         }
         else
         {
-            auto q = s.find('/', p + 1);
-            if (p != beginOffset)
-            {
-                stdPath += '/';
-            }
-            if (q == std::string::npos)
-            {
-                q = s.length();
-            }
-            stdPath += s.substr(p, q - p);
-            p = q + 1;
+            prefix = s.substr(0, 3);
+            s.erase(0, 3);
         }
     }
 
-    if (stdPath.empty())
+    if (s.back() == '/')
     {
-        stdPath = "./";
+        s.pop_back();
     }
-    return stdPath;
+
+    auto p = s.rfind('/');
+    if (p == std::string::npos)
+    {
+        p = 0;
+    }
+    else
+    {
+        p += 1;
+    }
+
+    while (p > 0)
+    {
+        auto q = s.rfind('/', p - 2);
+        if (q == std::string::npos)
+        {
+            q = 0;
+        }
+
+        if (s[q] == '.' && s[q + 1] == '/')
+        {
+            s.erase(q, 2);
+        }
+        else if (s.length() - p >= 3 && s[p] == '.' && s[p + 1] == '.' && s[p + 2] == '/')
+        {
+            s.erase(q, p - q);
+        }
+        p = q;
+    }
+
+    if (prefix.length() + s.length() == 0)
+    {
+        s = "./";
+    }
+
+    return prefix + s;
 }
 
 std::string FileSystem::toOSPath(const std::string& path) const
@@ -144,24 +156,28 @@ std::string FileSystem::toRelativePath(const std::string& path) const
     {
         return standard(path);
     }
+    if (path == osRootPath_)
+    {
+        return "./";
+    }
 
-    const auto stdPathSlash = standard(path) + '/';
-    const auto osRootPathSlash = osRootPath_ + '/';
+    const auto pathSlash = standard(path) + '/';
+    const auto rootPathSlash = osRootPath_ + '/';
 
     int diffAt = 0;
-    for (size_t p = 0; p < stdPathSlash.length() && p < osRootPathSlash.length() &&
-        stdPathSlash[p] == osRootPathSlash[p]; ++p)
+    for (size_t p = 0; p < pathSlash.length() && p < rootPathSlash.length() &&
+        pathSlash[p] == rootPathSlash[p]; ++p)
     {
-        if (osRootPathSlash[p] == '/')
+        if (rootPathSlash[p] == '/')
         {
             diffAt = p;
         }
     }
 
     int back = 0;
-    for (size_t p = diffAt + 1; p < osRootPathSlash.length(); ++p)
+    for (size_t p = diffAt + 1; p < rootPathSlash.length(); ++p)
     {
-        back += osRootPathSlash[p] == '/';
+        back += rootPathSlash[p] == '/';
     }
 
     std::string ret;
@@ -169,20 +185,20 @@ std::string FileSystem::toRelativePath(const std::string& path) const
     {
         ret += "../";
     }
-    ret += stdPathSlash.substr(diffAt + 1);
+    ret += pathSlash.substr(diffAt + 1);
 
-    if (ret.empty())
-    {
-        return "./";
-    }
     return ret;
 }
 
 bool FileSystem::isOSPath(const std::string& path) const
 {
-    if (path.length() >= 2)
+    if (!path.empty())
     {
-        if (tolower(path[0]) >= 'a' && tolower(path[0]) <= 'z' && path[1] == ':')
+        if (path[0] == '/')
+        {
+            return true;
+        }
+        if (path.length() >= 2 && tolower(path[0]) >= 'a' && tolower(path[0]) <= 'z' && path[1] == ':')
         {
             return true;
         }
