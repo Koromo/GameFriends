@@ -1,0 +1,58 @@
+// This is comment
+
+/*
+This is
+        comment
+*/
+
+// Identities has prefix "_" reserved by system.
+
+Config {
+    // shade type, output only .shade file. In this case, initial values of parameters are ignored.
+    // material type, output .material with .shade
+    type = shade;	// shade or material
+    name = reference;
+    output = files/output;	// output path 
+}
+
+Parameters {
+    float x = 3.2; // You can set initial values, otherwise, default is zero cleared.
+    float4 xyzw = {0.2, 0.1, 0.0, 1.0};
+
+    float4x4 matrix =
+        {1, 0, 0, 0,
+         0, 1, 0, 0,
+         0, 0, 1, 0,
+         0, 0, 0, 1};
+
+    tex2d colorful = blue.bmp;
+}
+
+Shaders {
+    Ref vs {
+	path = files/example.hlsl;
+	entry = vs_main;
+	map(matrix, offset);
+    }
+
+    Ref ps {
+	path = files/example.hlsl;
+	entry = ps_main;
+        map(colorful, seven_sea);
+	map(x, color_factor);
+        map(float(1.8), blend_factor); // You can map a raw value without material parameter
+        map(tex2d(blend_red.bmp), blend_texture); // We recommend only use raw values in the case of material type config
+    }
+}
+
+Pass {
+    vertexShader = vs;
+    pixelShader = ps;    
+
+    depthTest = true; // true or false (true)
+    depthFun = lessEqual; // never, equal, notEqual, less, lessEqual, greater, greaterEqual, always (less)
+
+    fillMode = solid; // wireframe, solid (solid)
+    cullFace = none; // none, front, back (back)
+    depthClip = false; // true or false (true)
+}

@@ -3,7 +3,7 @@ Auther:
 Comment:
 
 @Shade
-Path: media/reference.shade
+Path: reference.shade
 x: 3.2
 xyzw: 0.2 0.1 0.0 1.0
 matrix: 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1
