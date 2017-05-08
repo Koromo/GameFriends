@@ -4,6 +4,7 @@
 #include "../scene/texture.h"
 #include "../render/renderstate.h"
 #include "resource.h"
+#include "logging.h"
 #include "foundation/metaprop.h"
 #include "foundation/exception.h"
 #include <string>
@@ -32,14 +33,9 @@ bool ShadeModel::loadImpl()
     {
         file.read(path().os);
     }
-    catch (const InvalidMetaPropFile&)
+    catch (const Exception& e)
     {
-        /// LOG
-        return false;
-    }
-    catch (const FileException&)
-    {
-        /// LOG
+        GF_LOG_WARN("Failed to load shade model {}. {}", path().os, e.msg());
         return false;
     }
 
@@ -150,9 +146,9 @@ bool ShadeModel::loadImpl()
             drawCall_.setRasterizerState(state);
         }
     }
-    catch (const ResourceException&)
+    catch (const ResourceException& e)
     {
-        /// LOG
+        GF_LOG_WARN("Failed to load shade model {}. {}", path().os, e.msg());
         unloadImpl();
         return false;
     }
@@ -177,14 +173,9 @@ bool Material::loadImpl()
     {
         file.read(path().os);
     }
-    catch (const InvalidMetaPropFile&)
+    catch (const Exception& e)
     {
-        /// LOG
-        return false;
-    }
-    catch (const FileException&)
-    {
-        /// LOG
+        GF_LOG_WARN("Failed to load material {}. {}", path().os, e.msg());
         return false;
     }
 
@@ -256,9 +247,9 @@ bool Material::loadImpl()
             }
         }
     }
-    catch (const ResourceException&)
+    catch (const ResourceException& e)
     {
-        /// LOG
+        GF_LOG_WARN("Failed to load material {}. {}", path().os, e.msg());
         unloadImpl();
         return false;
     }

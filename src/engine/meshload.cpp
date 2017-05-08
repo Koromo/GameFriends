@@ -4,6 +4,7 @@
 #include "../render/vertexdata.h"
 #include "pixelformat.h"
 #include "resource.h"
+#include "logging.h"
 #include "foundation/metaprop.h"
 #include "foundation/exception.h"
 
@@ -56,14 +57,9 @@ bool Mesh::loadImpl()
     {
         file.read(path().os);
     }
-    catch (const InvalidMetaPropFile&)
+    catch (const Exception& e)
     {
-        /// LOG
-        return false;
-    }
-    catch (const FileException&)
-    {
-        /// LOG
+        GF_LOG_WARN("Failed to load mesh {}. {}", path().os, e.msg());
         return false;
     }
 
@@ -133,9 +129,9 @@ bool Mesh::loadImpl()
             addSubMesh(subMesh);
         }
     }
-    catch (const ResourceException&)
+    catch (const ResourceException& e)
     {
-        /// LOG
+        GF_LOG_WARN("Failed to load mesh {}. {}", path().os, e.msg());
         unloadImpl();
         return false;
     }

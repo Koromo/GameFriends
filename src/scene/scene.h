@@ -6,7 +6,6 @@
 #include "../engine/resource.h"
 #include "foundation/sortedvector.h"
 #include "foundation/matrix44.h"
-#include "foundation/exception.h"
 #include "foundation/prerequest.h"
 #include <memory>
 #include <vector>
@@ -73,13 +72,6 @@ public:
 };
 
 extern SceneAppContext sceneAppContext;
-
-class SceneError : public Error
-{
-public:
-    explicit SceneError(const std::string& msg)
-        : Error(msg) {}
-};
 
 GF_NAMESPACE_END
 

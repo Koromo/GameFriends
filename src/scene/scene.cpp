@@ -3,11 +3,13 @@
 #include "material.h"
 #include "materialparameter.h"
 #include "../engine/pixelformat.h"
+#include "../engine/logging.h"
 #include "../render/rendersystem.h"
 #include "../render/pixelbuffer.h"
 #include "../render/shaderprogram.h"
 #include "foundation/math.h"
 #include "foundation/color.h"
+#include "foundation/exception.h"
 #include <queue>
 
 GF_NAMESPACE_BEGIN
@@ -89,25 +91,33 @@ void RenderWorld::draw(const RenderCamera& camera)
 
 void SceneAppContext::startup()
 {
-    auto& graphicsExe = renderSystem.commandExecuter(GpuCommandType::graphics);
-    auto& copyExe = renderSystem.commandExecuter(GpuCommandType::copy);
-    const auto numFrameBuffers = renderSystem.numBackBuffers();
-    const auto frameIndex = renderSystem.currentFrameIndex();
-
-    frameResources_.resize(numFrameBuffers);
-    for (size_t i = 0; i < numFrameBuffers; ++i)
+    try
     {
-        frameResources_[i].graphicsCommands = graphicsExe.createCommands();
-        frameResources_[i].fenceValue_ = 0;
+        auto& graphicsExe = renderSystem.commandExecuter(GpuCommandType::graphics);
+        auto& copyExe = renderSystem.commandExecuter(GpuCommandType::copy);
+        const auto numFrameBuffers = renderSystem.numBackBuffers();
+        const auto frameIndex = renderSystem.currentFrameIndex();
+
+        frameResources_.resize(numFrameBuffers);
+        for (size_t i = 0; i < numFrameBuffers; ++i)
+        {
+            frameResources_[i].graphicsCommands = graphicsExe.createCommands();
+            frameResources_[i].fenceValue_ = 0;
+        }
+        copyCommands_ = copyExe.createCommands();
+
+        graphicsCommandBuilder_ = graphicsExe.createBuilder();
+        copyCommandBuilder_ = copyExe.createBuilder();
+
+        graphicsCommandBuilder_->record(*frameResources_[frameIndex].graphicsCommands);
+        copyCommandBuilder_->record(*copyCommands_);
     }
-    copyCommands_ = copyExe.createCommands();
-
-    graphicsCommandBuilder_ = graphicsExe.createBuilder();
-    copyCommandBuilder_ = copyExe.createBuilder();
-
-    graphicsCommandBuilder_->record(*frameResources_[frameIndex].graphicsCommands);
-    copyCommandBuilder_->record(*copyCommands_);
-
+    catch (const Exception& e)
+    {
+        GF_LOG_ERROR("SceneManager initialization error. {}", e.msg());
+        throw;
+    }
+    
     const auto fullySize = renderSystem.fullyViewport();
     PixelBufferSetup depthSetup = {};
     depthSetup.width = static_cast<size_t>(fullySize.width + EPSILON);
@@ -123,7 +133,7 @@ void SceneAppContext::startup()
     graphicsCommandBuilder_->transition(backBuffer(), PixelBufferState::present, PixelBufferState::renderTarget);
     graphicsCommandBuilder_->clearRenderTarget(backBuffer(), { 0, 0, 0, 1 });
 
-    /// LOG
+    GF_LOG_INFO("SceneManager initialized.");
 }
 
 void SceneAppContext::shutdown()
@@ -134,7 +144,7 @@ void SceneAppContext::shutdown()
     graphicsCommandBuilder_.reset();
     frameResources_.clear();
 
-    /// LOG
+    GF_LOG_INFO("SceneManager shutdown.");
 }
 
 GpuCommandBuilder& SceneAppContext::graphicsCommandBuilder()

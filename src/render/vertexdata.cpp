@@ -3,6 +3,7 @@
 #include "rendersystem.h"
 #include "d3dsupport.h"
 #include "foundation/exception.h"
+#include "../engine/logging.h"
 #include <algorithm>
 #include <cstring>
 
@@ -33,7 +34,7 @@ void VertexData::setVertices(const std::string& semantics, size_t index, const v
     if (FAILED(renderSystem.nativeDevice().CreateCommittedResource(&defaultHeap, D3D12_HEAP_FLAG_NONE, &desc,
         D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&buffer))))
     {
-        /// LOG
+        GF_LOG_WARN("Failed to create D3D12 vertex buffer.");
         vertices_.erase(found);
         return;
     }
@@ -82,7 +83,7 @@ void VertexData::setIndices(const unsigned short* data, size_t size)
     if (FAILED(renderSystem.nativeDevice().CreateCommittedResource(&defaultHeap, D3D12_HEAP_FLAG_NONE, &desc,
         D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&buffer))))
     {
-        /// LOG
+        GF_LOG_WARN("Failed to create D3D12 index buffer.");
         indices_ = {};
         return;
     }
@@ -146,7 +147,7 @@ void VertexData::upload(ID3D12GraphicsCommandList& list)
             const auto uploadedSize = UpdateSubresources<1>(&list, u.dest, intermediate.resource, intermediate.offset, 0, 1, &srcData);
             if (uploadedSize != u.srcSize)
             {
-                /// LOG
+                GF_LOG_WARN("Failed to vertex data completely uploading.");
             }
 
             barriers_.emplace_back(CD3DX12_RESOURCE_BARRIER::Transition(u.dest, D3D12_RESOURCE_STATE_COPY_DEST, u.afterState));

@@ -4,6 +4,7 @@
 #include "../scene/scene.h"
 #include "../scene/debugdraw.h"
 #include "../render/rendersystem.h"
+#include "../engine/logging.h"
 #include "../engine/resource.h"
 #include "../engine/filesystem.h"
 #include "../windowing/window.h"
@@ -38,7 +39,9 @@ namespace
 void Application::go()
 {
     /* Initialize */
-    /// LOG
+
+    // Logging 
+    logManager.startup("enginelog.txt");
 
     setup_.clientWidth = 640;
     setup_.clientHeight = 480;
@@ -65,7 +68,7 @@ void Application::go()
 
     if (FAILED(RegisterClassEx(&wc)))
     {
-        /// LOG
+        GF_LOG_ERROR("Game window creation error. Failed to register class.");
         throw WindowsException("Window class register failed.");
     }
 
@@ -80,9 +83,11 @@ void Application::go()
 
     if (windowHandle == NULL)
     {
-        /// LOG
+        GF_LOG_ERROR("Game window creation error. Failed to create window.");
         throw WindowsException("Window class creation failed.");
     }
+
+    GF_LOG_INFO("Game window creation succeeded");
 
     window = std::make_shared<Window>(windowHandle, setup_.clientWidth, setup_.clientHeight);
     setFrameRate(setup_.frameRate);
@@ -116,7 +121,7 @@ void Application::go()
     // Input
     inputDevice.startup(window);
 
-    /// LOG
+    GF_LOG_INFO("GameFriends initialization succeeded.");
 
     /* Game loop */
 
@@ -170,7 +175,7 @@ void Application::go()
     window->show(false);
 
     /* Finalize */
-    /// LOG
+    GF_LOG_INFO("Application will be shutdown.");
 
     shutdown();
 
@@ -198,7 +203,7 @@ void Application::go()
 
     window.reset();
 
-    /// LOG
+    logManager.shutdown();
 }
 
 void Application::quit()
@@ -218,6 +223,8 @@ void Application::setFrameRate(size_t fps)
         fps = MAX_FRAME_RATE;
     }
     frameTime_us_ = 1000000 / fps;
+
+    GF_LOG_DEBUG("Frame rate set as {}", fps);
 }
 
 size_t Application::latestFrameRate(size_t collectFrames)

@@ -3,6 +3,7 @@
 #include "descriptorheap.h"
 #include "linearallocator.h"
 #include "d3dsupport.h"
+#include "../engine/logging.h"
 #include "foundation/exception.h"
 
 GF_NAMESPACE_BEGIN
@@ -23,7 +24,7 @@ PixelBuffer::PixelBuffer(const PixelBufferSetup& setup, const D3D12_CLEAR_VALUE*
     if (FAILED(renderSystem.nativeDevice().CreateCommittedResource(
         &defaultHeap, D3D12_HEAP_FLAG_NONE, &desc, state, optimizedClear, IID_PPV_ARGS(&resource))))
     {
-        /// LOG
+        GF_LOG_WARN("Failed to create pixel buffer.");
         return;
     }
 
@@ -126,7 +127,7 @@ void PixelBuffer::upload(ID3D12GraphicsCommandList& list, const PixelUpload& pix
     const auto uploadedSize = UpdateSubresources<1>(&list, resource_.get(), intermediate.resource, intermediate.offset, 0, 1, &srcData);
     if (uploadedSize != intermediateSize)
     {
-        /// LOG
+        GF_LOG_WARN("Failed to pixel buffer completely uploading.");
     }
 }
 

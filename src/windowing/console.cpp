@@ -1,4 +1,5 @@
 #include "console.h"
+#include "../engine/logging.h"
 #include <cstdarg>
 
 GF_NAMESPACE_BEGIN
@@ -18,7 +19,7 @@ void Console::allocate()
     {
         if (!AllocConsole())
         {
-            /// LOG
+            GF_LOG_WARN("Console allocation failed.");
         }
         inHandle_ = GetStdHandle(STD_INPUT_HANDLE);
         outHandle_ = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -42,7 +43,7 @@ string_t Console::readLine()
     DWORD numReads;
     if (!ReadConsole(inHandle_, buffer_, BUFFER_SIZE - 1, &numReads, NULL))
     {
-        /// LOG
+        GF_LOG_WARN("Read from console failed.");
     }
     buffer_[numReads - 2] = GF_T('\0');
     return buffer_;
@@ -57,7 +58,7 @@ void Console::write(const char_t* str)
 
     if (!WriteConsole(outHandle_, str, static_cast<DWORD>(strlen(str)), NULL, NULL))
     {
-        /// LOG
+        GF_LOG_WARN("Write to console failed.");
     }
 }
 

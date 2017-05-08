@@ -3,6 +3,7 @@
 #include "../render/pixelbuffer.h"
 #include "../render/gpucommand.h"
 #include "../engine/codec.h"
+#include "../engine/logging.h"
 
 GF_NAMESPACE_BEGIN
 
@@ -24,14 +25,9 @@ bool MediaTexture::loadImpl()
     {
         image_ = decodeBmp(path().os);
     }
-    catch (const CodecException&)
+    catch (const Exception& e)
     {
-        /// LOG
-        return false;
-    }
-    catch (const FileException&)
-    {
-        /// LOG
+        GF_LOG_WARN("Failed to load texture {}. {}", path().os, e.msg());
         return false;
     }
 

@@ -1,4 +1,5 @@
 #include "soundvoice.h"
+#include "../engine/logging.h"
 
 GF_NAMESPACE_BEGIN
 
@@ -11,7 +12,7 @@ SoundVoice::SoundVoice(const ComWeakPtr<IXAudio2>& owner, const SoundFormat& fmt
     IXAudio2SourceVoice* voice;
     if (FAILED(owner_.lock()->CreateSourceVoice(&voice, &fmt)))
     {
-        /// LOG
+        GF_LOG_WARN("Failed to create the source voice.");
     }
     voice_ = makeVoicePtr(owner_, voice);
 }
@@ -41,7 +42,7 @@ void SoundVoice::submitBuffer(const unsigned char* data, size_t size, size_t loo
 
     if (FAILED(voice_->SubmitSourceBuffer(&buffer)))
     {
-        /// LOG
+        GF_LOG_WARN("Failed to submit audio buffers.");
     }
 }
 
@@ -58,7 +59,7 @@ void SoundVoice::start()
     {
         if (FAILED(voice_->Start(0)))
         {
-            /// LOG
+            GF_LOG_WARN("Failed to start audio buffers.");
         }
     }
 }
@@ -71,7 +72,7 @@ void SoundVoice::stop()
     }
     if (FAILED(voice_->Stop()))
     {
-        /// LOG
+        GF_LOG_WARN("Failed to stop audio buffers.");
     }
 }
 
@@ -83,7 +84,7 @@ void SoundVoice::flush()
     }
     if (FAILED(voice_->FlushSourceBuffers()))
     {
-        /// LOG
+        GF_LOG_WARN("Failed to flush audio buffers.");
     }
 }
 
@@ -116,7 +117,7 @@ void SoundVoice::setFrequencyRatio(float ratio)
     }
     if (FAILED(voice_->SetFrequencyRatio(ratio)))
     {
-        /// LOG
+        GF_LOG_WARN("Failed to change frequency ratio of source voice.");
     }
 }
 
@@ -128,7 +129,7 @@ void SoundVoice::setOutputMatrix(size_t numSrcChannels, size_t numDestChannels, 
     }
     if (FAILED(voice_->SetOutputMatrix(nullptr, numSrcChannels, numDestChannels, levelMatrix)))
     {
-        /// LOG
+        GF_LOG_WARN("Failed to change output matrix of source voice.");
     }
 }
 

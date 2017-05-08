@@ -1,5 +1,6 @@
 #include "audiomanager.h"
 #include "soundvoice.h"
+#include "../engine/logging.h"
 #include <vector>
 
 GF_NAMESPACE_BEGIN
@@ -15,16 +16,17 @@ AudioManager audioManager;
 
 void AudioManager::startup()
 {
-    if (FAILED(CoInitializeEx(nullptr, COINIT_MULTITHREADED)))
+    auto hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+    if (hr != S_FALSE && FAILED(hr))
     {
-        /// LOG
+        GF_LOG_ERROR("COM initialization error.");
         throw XAudioError("COM initialization failed.");
     }
 
     IXAudio2* xAudio;
     if (FAILED(XAudio2Create(&xAudio)))
     {
-        /// LOG
+        GF_LOG_ERROR("AudioSystem initialization error. Failed to create the device.");
         throw XAudioError("IXAudio2 creation error.");
     }
     xAudio_ = makeComPtr(xAudio);
@@ -32,7 +34,7 @@ void AudioManager::startup()
     IXAudio2MasteringVoice* masteringVoice;
     if (FAILED(xAudio_->CreateMasteringVoice(&masteringVoice)))
     {
-        /// LOG
+        GF_LOG_ERROR("AudioSystem initialization error. Failed to create the mastering voice.");
         throw XAudioError("IXAudio2MasteringVoice creation error.");
     }
     masteringVoice_ = makeVoicePtr(xAudio_, masteringVoice);
@@ -52,6 +54,8 @@ void AudioManager::startup()
     listener_ = {};
     listenerActive_ = true;
     levelMatrixMemory_.fill(0.8f);
+
+    GF_LOG_INFO("AudioSystem initialized.");
 }
 
 void AudioManager::shutdown()
@@ -60,6 +64,7 @@ void AudioManager::shutdown()
     masteringVoice_.reset();
     xAudio_.reset();
     CoUninitialize();
+    GF_LOG_INFO("AudioSystem shutdown.");
 }
 
 AudioDeviceDetails AudioManager::deviceDetails() const

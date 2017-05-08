@@ -70,16 +70,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>D:\Users\progg\btphysics\bullet3-2.83.7\src;$(IncludePath)</IncludePath>
+    <IncludePath>D:\Users\progg\spdlog\include;D:\Users\progg\btphysics\bullet3-2.83.7\src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>D:\Users\progg\btphysics\bullet3-2.83.7\src;$(IncludePath)</IncludePath>
+    <IncludePath>D:\Users\progg\spdlog\include;D:\Users\progg\btphysics\bullet3-2.83.7\src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>D:\Users\progg\btphysics\bullet3-2.83.7\src;$(IncludePath)</IncludePath>
+    <IncludePath>D:\Users\progg\spdlog\include;D:\Users\progg\btphysics\bullet3-2.83.7\src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>D:\Users\progg\btphysics\bullet3-2.83.7\src;$(IncludePath)</IncludePath>
+    <IncludePath>D:\Users\progg\spdlog\include;D:\Users\progg\btphysics\bullet3-2.83.7\src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

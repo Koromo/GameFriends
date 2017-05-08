@@ -1,6 +1,7 @@
 #include "rootsignature.h"
 #include "rendersystem.h"
 #include "d3dsupport.h"
+#include "../engine/logging.h"
 #include "foundation/math.h"
 #include <array>
 #include <vector>
@@ -117,21 +118,22 @@ ID3D12RootSignature& RootSignatureCache::obtain(const EachShaderSignature& key)
         const auto hr = D3D12SerializeRootSignature(&rsDesc, D3D_ROOT_SIGNATURE_VERSION_1, &rsBlob, &err);
         if (FAILED(hr))
         {
-            std::string msg = "Failed to serialize the root signature.";
+            std::string msg = "Failed to serialize root signature.";
             if (err)
             {
                 msg += " ";
                 msg += reinterpret_cast<char*>(err->GetBufferPointer());
+                GF_LOG_WARN(msg);
                 err->Release();
             }
-            /// LOG
+            GF_LOG_WARN("Failed to serialize root signature.");
             throw Direct3DException(msg);
         }
 
         ID3D12RootSignature* rs;
         if (FAILED(device_->CreateRootSignature(0, rsBlob->GetBufferPointer(), rsBlob->GetBufferSize(), IID_PPV_ARGS(&rs))))
         {
-            /// LOG
+            GF_LOG_WARN("Failed to create root signature.");
             throw Direct3DException("Failed to create the ID3D12RootSignature.");
         }
         rs->SetName(L"RootSignature");

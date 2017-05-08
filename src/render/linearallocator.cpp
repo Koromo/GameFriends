@@ -1,6 +1,7 @@
 #include "linearallocator.h"
 #include "rendersystem.h"
 #include "d3dsupport.h"
+#include "../engine/logging.h"
 #include "foundation/math.h"
 #include "foundation/exception.h"
 
@@ -70,7 +71,7 @@ LinearAllocator::Page LinearAllocator::createNewPage()
     ID3D12Resource* resource;
     if (FAILED(device_->CreateCommittedResource(&heapProp, D3D12_HEAP_FLAG_NONE, &desc, state, nullptr, IID_PPV_ARGS(&resource))))
     {
-        /// LOG
+        GF_LOG_WARN("D3D12 committed resource linear allocation failed.");
         throw Direct3DException("Failed to create the ID3D12Resource.");
     }
     resource->SetName(L"LinearBuffer");

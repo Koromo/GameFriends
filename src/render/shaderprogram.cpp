@@ -2,6 +2,7 @@
 #include "rootsignature.h"
 #include "pixelbuffer.h"
 #include "rendersystem.h"
+#include "../engine/logging.h"
 #include "foundation/string.h"
 #include "foundation/math.h"
 #include "foundation/exception.h"
@@ -140,7 +141,7 @@ void ShaderParameters::createBindingMap(ID3D12ShaderReflection* shader, const Sh
             if (FAILED(renderSystem.nativeDevice().CreateCommittedResource(&uploadHeap, D3D12_HEAP_FLAG_NONE,
                 &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&resource))))
             {
-                /// LOG
+                GF_LOG_WARN("Failed to create D3D12 constant buffer.");
                 break;
             }
             resource->SetName(L"ConstantBuffer");
@@ -256,13 +257,14 @@ CompiledShader HLSLShader::compile()
             entry_.c_str(), model_.c_str(), FLAGS, 0, &blob, &err);
         if (FAILED(hr))
         {
-            /// LOG
             if (err)
             {
                 const std::string msg = static_cast<char*>(err->GetBufferPointer());
                 err->Release();
+                GF_LOG_ERROR("Shader compile error. {}", msg);
                 throw ShaderCompileError(msg);
             }
+            GF_LOG_ERROR("Shader compile error. File not found {}", path().os);
             throw ShaderCompileError("File not found (" + path().os + ").");
         }
 

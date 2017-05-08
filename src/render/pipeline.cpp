@@ -1,6 +1,7 @@
 #include "pipeline.h"
 #include "rendersystem.h"
 #include "d3dsupport.h"
+#include "../engine/logging.h"
 #include "foundation/math.h"
 #include "foundation/exception.h"
 
@@ -49,7 +50,7 @@ ID3D12PipelineState& GraphicsPipelineStateCache::obtain(const D3D12_GRAPHICS_PIP
         ID3D12PipelineState* pso;
         if (FAILED(device_->CreateGraphicsPipelineState(&key, IID_PPV_ARGS(&pso))))
         {
-            /// LOG
+            GF_LOG_WARN("GraphicsPipelineState object creation error.");
             throw Direct3DException("Failed to create ID3D12PipelineState.");
         }
         pso->SetName(L"PipelineStateObject");

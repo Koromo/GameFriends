@@ -3,6 +3,7 @@
 #include "d3dsupport.h"
 #include "../windowing/window.h"
 #include "../engine/pixelformat.h"
+#include "../engine/logging.h"
 #include "foundation/color.h"
 
 GF_NAMESPACE_BEGIN
@@ -18,7 +19,7 @@ void RenderSystem::startup(Window& chainWindow, size_t numBackBuffers)
     ID3D12Debug* debug;
     if (FAILED(D3D12GetDebugInterface(IID_PPV_ARGS(&debug))))
     {
-        /// LOG:
+        GF_LOG_WARN("Failed to enable D3D12 debug layer");
     }
     else
     {
@@ -32,7 +33,7 @@ void RenderSystem::startup(Window& chainWindow, size_t numBackBuffers)
     ID3D12Device* device;
     if (FAILED(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&device))))
     {
-        /// LOG
+        GF_LOG_ERROR("D3D12 RenderSystem initialization error. Failed to create the device.");
         throw Direct3DError("ID3D12Device creation failed");
     }
     device->SetName(L"Device");
@@ -44,7 +45,7 @@ void RenderSystem::startup(Window& chainWindow, size_t numBackBuffers)
     IDXGIFactory4* factory;
     if (FAILED(CreateDXGIFactory1(IID_PPV_ARGS(&factory))))
     {
-        /// LOG
+        GF_LOG_ERROR("D3D12 RenderSystem initialization error. Failed to create the swap chain.");
         throw Direct3DError("IDXGIFactory creation failed.");
     }
     GF_SCOPE_EXIT{ factory->Release(); };
@@ -67,7 +68,7 @@ void RenderSystem::startup(Window& chainWindow, size_t numBackBuffers)
     if (FAILED(factory->CreateSwapChainForHwnd(&commandExecuter(GpuCommandType::graphics).nativeQueue(),
         chainWindow.handle(), &swapChainDesc, nullptr, nullptr, &swapChain1)))
     {
-        /// LOG
+        GF_LOG_ERROR("D3D12 RenderSystem initialization error. Failed to create the swap chain.");
         throw Direct3DError("IDXGISwapChain1 creation failed.");
     }
     GF_SCOPE_EXIT{ swapChain1->Release(); };
@@ -75,7 +76,7 @@ void RenderSystem::startup(Window& chainWindow, size_t numBackBuffers)
     IDXGISwapChain3* swapChain3;
     if (FAILED(swapChain1->QueryInterface(IID_PPV_ARGS(&swapChain3))))
     {
-        /// LOG
+        GF_LOG_ERROR("D3D12 RenderSystem initialization error. Failed to query the swap chain.");
         throw Direct3DError("IDXGISwapChain3 query failed.");
     }
     swapChain_ = makeComPtr(swapChain3);
@@ -97,7 +98,7 @@ void RenderSystem::startup(Window& chainWindow, size_t numBackBuffers)
         ID3D12Resource* backBuffer;
         if (FAILED(swapChain3->GetBuffer(i, IID_PPV_ARGS(&backBuffer))))
         {
-            /// LOG
+            GF_LOG_ERROR("D3D12 RenderSystem initialization error. Failed to get back buffers.");
             throw Direct3DError("Getting back buffers failed.");
         }
         backBuffer->SetName(L"BackBuffer");
@@ -116,7 +117,7 @@ void RenderSystem::startup(Window& chainWindow, size_t numBackBuffers)
     fullyViewport_.width = static_cast<float>(chainWindow.clientWidth());
     fullyViewport_.height = static_cast<float>(chainWindow.clientHeight());
 
-    /// LOG
+    GF_LOG_INFO("D3D12 RenderSystem initialized");
 }
 
 void RenderSystem::shutdown()
@@ -141,7 +142,7 @@ void RenderSystem::shutdown()
 
     device_.reset();
 
-    /// LOG
+    GF_LOG_INFO("D3D12 RenderSystem shutdown");
 }
 
 size_t RenderSystem::numBackBuffers() const
@@ -173,7 +174,7 @@ void RenderSystem::present()
 {
     if (FAILED(swapChain_->Present(1, 0)))
     {
-        /// LOG:
+        GF_LOG_WARN("Present the swap chain failed.");
     }
     frameIndex_ = swapChain_->GetCurrentBackBufferIndex();
 }

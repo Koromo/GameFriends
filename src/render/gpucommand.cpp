@@ -4,6 +4,7 @@
 #include "drawcall.h"
 #include "pixelbuffer.h"
 #include "d3dsupport.h"
+#include "../engine/logging.h"
 #include "foundation/color.h"
 #include "foundation/exception.h"
 #include <string>
@@ -19,7 +20,7 @@ void GpuCommands::reset()
 {
     if (FAILED(allocator_->Reset()))
     {
-        /// LOG
+        GF_LOG_WARN("Failed to reset gpu command allocator.");
     }
 }
 
@@ -37,7 +38,7 @@ void GpuCommandBuilder::record(GpuCommands& buildTarget)
 {
     if (FAILED(list_->Reset(&buildTarget.nativeAllocator(), nullptr)))
     {
-        /// LOG:
+        GF_LOG_WARN("Failed to reset gpu command list.");
     }
 }
 
@@ -45,7 +46,7 @@ void GpuCommandBuilder::close()
 {
     if (FAILED(list_->Close()))
     {
-        /// LOG
+        GF_LOG_WARN("Failed to close gpu command allocator.");
     }
 }
 
@@ -104,7 +105,7 @@ void GpuCommandExecuter::construct(ID3D12Device* device, GpuCommandType type)
     ID3D12CommandQueue* commandQueue;
     if (FAILED(device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&commandQueue))))
     {
-        /// LOG
+        GF_LOG_ERROR("D3D12 command queue creation error ({}).", typeNumber);
         throw Direct3DError("ID3D12CommandQueue (type " + typeNumber + ") creation failed.");
     }
     commandQueue->SetName(L"CommandQueue");
@@ -116,7 +117,7 @@ void GpuCommandExecuter::construct(ID3D12Device* device, GpuCommandType type)
     ID3D12Fence* fence;
     if (FAILED(device_->CreateFence(currentFenceValue_, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence))))
     {
-        /// LOG
+        GF_LOG_ERROR("D3D12 fence creation error.");
         throw Direct3DError("ID3D12Fence creation failed.");
     }
     fence->SetName(L"Fence");
@@ -125,7 +126,7 @@ void GpuCommandExecuter::construct(ID3D12Device* device, GpuCommandType type)
     ID3D12CommandAllocator* allocator;
     if (FAILED(device->CreateCommandAllocator(type_, IID_PPV_ARGS(&allocator))))
     {
-        /// LOG
+        GF_LOG_ERROR("GpuCommandExecuter ({}) initialization error.", typeNumber);
         throw Direct3DError("GpuCommandExecuter initialization failed.");
     }
     allocator->SetName(L"DefaultCommandAllocator");
@@ -146,7 +147,7 @@ std::shared_ptr<GpuCommands> GpuCommandExecuter::createCommands()
     ID3D12CommandAllocator* allocator;
     if (FAILED(device_->CreateCommandAllocator(type_, IID_PPV_ARGS(&allocator))))
     {
-        /// LOG:
+        GF_LOG_WARN("Failed to create gpu command allocator.");
         throw Direct3DException("Failed to create the ID3D12CommandAllocator.");
     }
     allocator->SetName(L"CommandAllocator");
@@ -159,7 +160,7 @@ std::shared_ptr<GpuCommandBuilder> GpuCommandExecuter::createBuilder()
     ID3D12GraphicsCommandList* list;
     if (FAILED(device_->CreateCommandList(0, type_, defaultAllocator_.get(), nullptr, IID_PPV_ARGS(&list))))
     {
-        /// LOG
+        GF_LOG_WARN("Failed to create gpu command list.");
         throw Direct3DException("Failed to create the ID3D12GraphicsCommandList.");
     }
     list->SetName(L"CommandList");
@@ -176,7 +177,7 @@ FenceValue GpuCommandExecuter::execute(GpuCommandBuilder& builder)
 
     if (FAILED(commandQueue_->Signal(fence_.get(), currentFenceValue_)))
     {
-        /// LOG
+        GF_LOG_WARN("Failed to signal from D3D12 command queue to fence.");
     }
 
     return currentFenceValue_;

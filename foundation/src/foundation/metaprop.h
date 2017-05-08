@@ -9,7 +9,7 @@
 
 GF_NAMESPACE_BEGIN
 
-class InvalidMetaPropFile : FileException
+class InvalidMetaPropFile : public FileException
 {
 public:
     explicit InvalidMetaPropFile(const std::string& msg)

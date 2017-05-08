@@ -1,4 +1,5 @@
 #include "resource.h"
+#include "logging.h"
 
 GF_NAMESPACE_BEGIN
 
@@ -22,8 +23,11 @@ void Resource::load()
 {
     if (!ready_)
     {
-        /// LOG
         ready_ = loadImpl();
+        if (ready_)
+        {
+            GF_LOG_DEBUG("Resource {} loaded.", path_.os);
+        }
     }
 }
 
@@ -32,19 +36,20 @@ void Resource::unload()
     if (ready_)
     {
         unloadImpl();
+        GF_LOG_DEBUG("Resource {} unloaded.", path_.os);
         ready_ = false;
     }
 }
 
 void ResourceManager::startup()
 {
-    /// LOG
+    GF_LOG_INFO("ResourceManager initialized.");
 }
 
 void ResourceManager::shutdown()
 {
     clear();
-    /// LOG
+    GF_LOG_INFO("ResourceManager shutdown.");
 }
 
 void ResourceManager::destroy(const FilePath& path)

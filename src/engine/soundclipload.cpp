@@ -1,4 +1,5 @@
 #include "../audio/soundclip.h"
+#include "../engine/logging.h"
 #include "foundation/exception.h"
 #include "foundation/string.h"
 
@@ -11,7 +12,7 @@ bool SoundClip::loadImpl()
     const auto mmio = mmioOpen(const_cast<TCHAR*>(tpath.c_str()), nullptr, MMIO_READ);
     if (!mmio)
     {
-        /// LOG
+        GF_LOG_WARN("Failed to load sound clip {}.", path().os);
         return false;
     }
     GF_SCOPE_EXIT{ mmioClose(mmio, 0); };

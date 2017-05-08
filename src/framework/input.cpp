@@ -1,5 +1,6 @@
 #include "input.h"
 #include "../windowing/window.h"
+#include "../engine/logging.h"
 #include "foundation/exception.h"
 
 GF_NAMESPACE_BEGIN
@@ -89,19 +90,20 @@ void InputDevice::showMouseCursor(bool b)
 
 void InputDevice::startup(const std::shared_ptr<Window>& window)
 {
-    /// LOG
     window_ = window;
 
     keyStatus_.fill(false);
     preKeyStatus_.fill(false);
     mouseButtons_.fill(false);
     preMouseButtons_.fill(false);
+
+    GF_LOG_INFO("InputManager initialized.");
 }
 
 void InputDevice::shutdown()
 {
-    /// LOG
     window_.reset();
+    GF_LOG_INFO("InputManager shutdown.");
 }
 
 void InputDevice::nextFrame()

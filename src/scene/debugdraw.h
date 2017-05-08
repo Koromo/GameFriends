@@ -23,7 +23,7 @@ private:
     std::shared_ptr<VertexData> vertex_;
 
 public:
-    void startup() noexcept(false);
+    void startup();
     void shutdown();
 
     void line(const Vector3& from, const Vector3& to, const Color& color);

@@ -6,6 +6,7 @@
 #include "../render/gpucommand.h"
 #include "../render/drawcall.h"
 #include "../engine/pixelformat.h"
+#include "../engine/logging.h"
 #include "foundation/matrix44.h"
 
 GF_NAMESPACE_BEGIN
@@ -22,11 +23,12 @@ void DebugDraw::startup()
 
     if (!material_->ready())
     {
-        /// LOG
-        throw SceneError("DebugDraw initialization failed.");
+        GF_LOG_WARN("Failed to enable DebugDrawManager. Resource loading failed.");
     }
-
-    /// LOG
+    else
+    {
+        GF_LOG_INFO("DebugDrawManager initialized.");
+    }
 }
 
 void DebugDraw::shutdown()
@@ -35,12 +37,12 @@ void DebugDraw::shutdown()
     positions_.clear();
     colors_.clear();
     vertex_.reset();
-    /// LOG
+    GF_LOG_INFO("DebugDrawManager shutdown.");
 }
 
 void DebugDraw::drawDebugs(const RenderCamera& camera)
 {
-    if (positions_.empty())
+    if (positions_.empty() || !material_.useable())
     {
         return;
     }

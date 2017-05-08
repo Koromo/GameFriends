@@ -1,6 +1,7 @@
 #include "descriptorheap.h"
 #include "rendersystem.h"
 #include "d3dsupport.h"
+#include "../engine/logging.h"
 
 GF_NAMESPACE_BEGIN
 
@@ -70,7 +71,7 @@ DescriptorHeap::Page DescriptorHeap::createNewPage(bool shaderVisible)
     ID3D12DescriptorHeap* heap;
     if (FAILED(device_->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&heap))))
     {
-        /// LOG:
+        GF_LOG_WARN("Descriptor heap allocation error.");
         throw Direct3DException("Failed to create ID3D12DescriptorHeap.");
     }
     heap->SetName(L"DescriptorHeap");

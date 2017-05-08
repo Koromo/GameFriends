@@ -1,4 +1,5 @@
 #include "filesystem.h"
+#include "logging.h"
 #include "../windowing/windowsinc.h" // instead of unistd.h
 #include "foundation/string.h"
 #include "foundation/exception.h"
@@ -40,7 +41,7 @@ void FileSystem::startup(const std::string& rootDirectory)
 {
     if (!PathIsDirectoryA(rootDirectory.c_str()))
     {
-        /// LOG
+        GF_LOG_ERROR("FileSystem initialization error. ""[]"" is invalid relative path or directory not exists.", rootDirectory);
         throw FileSystemError("The required root directory (" + rootDirectory + ") is not exists.");
     }
 
@@ -55,12 +56,12 @@ void FileSystem::startup(const std::string& rootDirectory)
         osRootPath_ = standard(narrow(buf) + '/' + rootDirectory);
     }
 
-    /// LOG
+    GF_LOG_INFO("FileSystem initialized. The current directory is {}.", osRootPath_);
 }
 
 void FileSystem::shutdown()
 {
-    /// LOG
+    GF_LOG_INFO("FileSystem shutdown.");
 }
 
 std::string FileSystem::standard(const std::string& path) const
