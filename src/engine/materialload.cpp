@@ -9,6 +9,7 @@
 #include "foundation/exception.h"
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 GF_NAMESPACE_BEGIN
 
@@ -73,7 +74,22 @@ bool ShadeModel::loadImpl()
 
                 const auto path = Compile[0];
                 const auto entry = Compile[1];
-                program_.compile(stageType, path, entry);
+
+                std::vector<ShaderMacro> macros;
+                if (SS.has("Macro"))
+                {
+                    const auto& Macro = SS.get("Macro");
+                    enforce<ShadeModelLoadException>(Macro.size() % 2 == 0,
+                        "Macro: requires (<name <value>)* in @" + stageName + ").");
+
+                    const auto size = Macro.size();
+                    for (size_t i = 0; i < size; i += 2)
+                    {
+                        macros.emplace_back(ShaderMacro{ Macro[i], Macro[i + 1] });
+                    }
+                }
+
+                program_.compile(stageType, path, entry, std::cbegin(macros), std::cend(macros));
 
                 for (int i = 0; SS.has("Map" + std::to_string(i)); ++i)
                 {

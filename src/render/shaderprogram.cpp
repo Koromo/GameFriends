@@ -5,6 +5,7 @@
 #include "foundation/string.h"
 #include "foundation/math.h"
 #include "foundation/exception.h"
+#include <utility>
 
 GF_NAMESPACE_BEGIN
 
@@ -219,9 +220,9 @@ void HLSLShader::setEntry(const std::string& entry)
     entry_ = entry;
 }
 
-void HLSLShader::setMacros(std::initializer_list<ShaderMacro>& macros)
+void HLSLShader::setMacros(std::vector<ShaderMacro>&& macros)
 {
-    macros_ = std::vector<ShaderMacro>(std::cbegin(macros), std::cend(macros));
+    macros_ = std::move(macros);
 }
 
 CompiledShader HLSLShader::compile()
@@ -301,8 +302,7 @@ ShaderProgram::ShaderProgram()
     shaders_.fill(CompiledShader{});
 }
 
-void ShaderProgram::compile(ShaderType type, const std::string& path, const std::string& entry,
-    std::initializer_list<ShaderMacro>& macros)
+void ShaderProgram::compile(ShaderType type, const std::string& path, const std::string& entry, std::vector<ShaderMacro>&& macros)
 {
     std::string model;
     switch (type)
@@ -328,7 +328,7 @@ void ShaderProgram::compile(ShaderType type, const std::string& path, const std:
 
     shaderFile->setEntry(entry);
     shaderFile->setModel(model);
-    shaderFile->setMacros(macros);
+    shaderFile->setMacros(std::move(macros));
 
     const auto shader = shaderFile->compile();
     shaders_[index(type)] = shader;

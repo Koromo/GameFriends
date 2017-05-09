@@ -13,6 +13,7 @@ Map1: matrix offset
 Compile: files/example.hlsl ps_main
 Map0: colorful seven_sea
 Map1: x color_factor
+Macro: DENY_COLOR_FACTOR 0 DENNY_RED 1
 
 
 @DepthStencil

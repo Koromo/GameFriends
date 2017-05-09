@@ -129,7 +129,7 @@ public:
 
     void setModel(const std::string& model);
     void setEntry(const std::string& entry);
-    void setMacros(std::initializer_list<ShaderMacro>& macros);
+    void setMacros(std::vector<ShaderMacro>&& macros);
     CompiledShader compile() noexcept(false);
 
 private:
@@ -146,8 +146,15 @@ private:
 public:
     ShaderProgram();
 
+    void compile(ShaderType type, const std::string& path, const std::string& entry, std::vector<ShaderMacro>&& macros) noexcept(false);
+
+    template <class Macros>
     void compile(ShaderType type, const std::string& path, const std::string& entry,
-        std::initializer_list<ShaderMacro>& macros = std::initializer_list<ShaderMacro>()) noexcept(false);
+        Macros macroBegin, Macros macroEnd) noexcept(false)
+    {
+        compile(type, path, entry, std::vector<ShaderMacro>(macroBegin, macroEnd));
+    }
+
     std::shared_ptr<ShaderParameters> createParameters() const  noexcept(false);
 
     D3D12_SHADER_BYTECODE shaderStage(ShaderType type) const;
