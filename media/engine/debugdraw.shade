@@ -1,7 +1,3 @@
-@_Header
-Auther:
-Comment:
-
 @Parameters
 0: float4x4 ViewProj
 
@@ -13,7 +9,10 @@ Map0: ViewProj viewProj
 Compile: engine/debugdraw.hlsl psMain
 
 @DepthStencil
-DepthEnable: 0
+DepthEnable: 0	# boolean
+DepthFun: 2	# 0:never 1:equal 2:notEqual 3:less 4:lessEqual 5:greater 6:greaterEqual 7:always
 
 @Rasterizer
-Fill: 0
+Fill: 0	# 0:wireframe 1:solid
+Cull: 0	# 0:none 1:front 2:back   
+DepthClip: 1	# boolean

@@ -106,6 +106,13 @@ struct Pass_t
     int depthClip = 1;
 };
 
+struct Config
+{
+    std::string type;
+    std::string name;
+    std::string output;
+};
+
 struct Context
 {
     std::string path;
@@ -113,9 +120,7 @@ struct Context
     std::queue<Token> tokens;
     Token current;
 
-    std::string confType;
-    std::string confName;
-    std::string confOut;
+    Config config;
     std::unordered_set<std::string> identifiers;
     std::unordered_map<std::string, Parameter_t> paramTable;
     std::unordered_map<std::string, ShaderReference_t> shaders;
@@ -126,8 +131,8 @@ struct Context
 
 inline size_t generateUniqueID()
 {
-    static unsigned i = 0;
-    return i++;
+    static unsigned i = -1;
+    return i--;
 }
 
 inline void error(Context& context, const std::string& msg)

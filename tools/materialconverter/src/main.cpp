@@ -81,7 +81,7 @@ struct Parser
                 {
                     syntaxError(context);
                 }
-                context.confType = type;
+                context.config.type = type;
                 forward(context, ";");
             }
         } type;
@@ -91,7 +91,7 @@ struct Parser
             void parse(Context& context)
             {
                 forward(context, "=");
-                context.confName = forward(context);
+                context.config.name = forward(context);
                 forward(context, ";");
             }
         } name;
@@ -101,7 +101,7 @@ struct Parser
             void parse(Context& context)
             {
                 forward(context, "=");
-                context.confOut = forward(context);
+                context.config.output = forward(context);
                 forward(context, ";");
             }
         } output;
@@ -789,14 +789,6 @@ void initReservedWords(Context& context)
     reservedWord(context, RW_BACK);
 }
 
-void checkConfig(Context& context)
-{
-    if (context.confType.empty() || context.confName.empty() || context.confOut.empty())
-    {
-        error(context, ".matcode needs to describe Configs.");
-    }
-}
-
 void checkShaderMappings(Context& context)
 {
     for (const auto& shader : context.shaders)
@@ -856,7 +848,7 @@ void exportShade(const Context& context)
         MetaProperty prop(std::to_string(i));
         prop[0] = param.second.type;
         prop[1] = param.second.name;
-        Parameters.addProp(prop);
+        Parameters.add(prop);
         ++i;
     }
 
@@ -869,13 +861,13 @@ void exportShade(const Context& context)
                 MetaProperty prop(std::to_string(i));
                 prop[0] = mapping.rawValue.type;
                 prop[1] = mapping.rawValue.name;
-                Parameters.addProp(prop);
+                Parameters.add(prop);
                 ++i;
             }
         }
     }
 
-    mpFile.addGroup(Parameters);
+    mpFile.add(Parameters);
 
     // ShadersStages
     const auto buildShaderStage = [&](const ShaderReference_t& shaderRef, const std::string& stageName)
@@ -886,7 +878,7 @@ void exportShade(const Context& context)
         Compile[0] = shaderRef.path;
         Compile[1] = shaderRef.entry;
 
-        S.addProp(Compile);
+        S.add(Compile);
 
         i = 0;
         for (const auto& mapping : shaderRef.mappings)
@@ -906,11 +898,11 @@ void exportShade(const Context& context)
             Map[0] = paramName;
             Map[1] = mapping.mapTo;
 
-            S.addProp(Map);
+            S.add(Map);
             ++i;
         }
 
-        mpFile.addGroup(S);
+        mpFile.add(S);
     };
 
     if (!context.pass.vs.empty())
@@ -937,9 +929,9 @@ void exportShade(const Context& context)
     DepthEnable.set(0, context.pass.depthEnable);
     DepthFun.set(0, context.pass.depthFun);
 
-    DepthStencil.addProp(DepthEnable);
-    DepthStencil.addProp(DepthFun);
-    mpFile.addGroup(DepthStencil);
+    DepthStencil.add(DepthEnable);
+    DepthStencil.add(DepthFun);
+    mpFile.add(DepthStencil);
 
     // @Rasterizer
     MetaPropGroup Rasterizer("Rasterizer");
@@ -951,12 +943,12 @@ void exportShade(const Context& context)
     Cull.set(0, context.pass.cull);
     DepthClip.set(0, context.pass.depthClip);
 
-    Rasterizer.addProp(Fill);
-    Rasterizer.addProp(Cull);
-    Rasterizer.addProp(DepthClip);
-    mpFile.addGroup(Rasterizer);
+    Rasterizer.add(Fill);
+    Rasterizer.add(Cull);
+    Rasterizer.add(DepthClip);
+    mpFile.add(Rasterizer);
 
-    mpFile.write(context.confOut + "/" + context.confName + ".shade");
+    mpFile.write(context.config.output + "/" + context.config.name + ".shade");
 }
 
 void exportMaterial(const Context& context)
@@ -979,7 +971,7 @@ void exportMaterial(const Context& context)
         {
             prop[j] = param.second.value[j];
         }
-        Shade.addProp(prop);
+        Shade.add(prop);
         ++i;
     }
 
@@ -994,29 +986,29 @@ void exportMaterial(const Context& context)
                 {
                     prop[j] = mapping.rawValue.value[j];
                 }
-                Shade.addProp(prop);
+                Shade.add(prop);
                 ++i;
             }
         }
     }
 
-    mpFile.addGroup(Shade);
-    mpFile.write(context.confOut + "/" + context.confName + ".material");
+    mpFile.add(Shade);
+    mpFile.write(context.config.output + "/" + context.config.name + ".material");
 }
 
 int main(int argv, char** argc)
 {
-    const std::string messagePath = "MaterialConverterMsg.txt";
-    std::ofstream message(messagePath);
-    if (!message.is_open())
+    const std::string msgPath = "MaterialConverterMsg.txt";
+    std::ofstream msg(msgPath);
+    if (!msg.is_open())
     {
         return 14; // Message file not opened
     }
-    GF_SCOPE_EXIT{ message.close(); };
+    GF_SCOPE_EXIT{ msg.close(); };
 
     if (argv != 2)
     {
-        message << "Usage: " << argc[0] << " path(.matcode)" << std::endl;
+        msg << "Usage: " << argc[0] << " path(.matcode)" << std::endl;
         return 12; // Usage error exit
     }
 
@@ -1026,7 +1018,7 @@ int main(int argv, char** argc)
         std::ifstream input(inputPath);
         if (!input.is_open())
         {
-            message << "File not found (" << inputPath << ")." << std::endl;
+            msg << "File not found (" << inputPath << ")." << std::endl;
             return 10; // Failed to open input
         }
 
@@ -1036,14 +1028,32 @@ int main(int argv, char** argc)
 
         context.path = inputPath;
         context.current.n = 0;
+
+        auto defaultName = inputPath;
+        {
+            const auto p = defaultName.rfind('.');
+            if (p != std::string::npos && defaultName.substr(p) == ".matcode")
+            {
+                defaultName.erase(p);
+                const auto q = defaultName.find_last_of("/\\");
+                if (q != std::string::npos)
+                {
+                    defaultName.erase(0, q + 1);
+                }
+            }
+        }
+        context.config.type = RW_MATERIAL;
+        context.config.name = defaultName;
+        context.config.output = "./";
+
         initReservedWords(context);
 
         if (!context.errors.empty())
         {
-            message << "System error!" << std::endl;
+            msg << "System error!" << std::endl;
             for (const auto& e : context.errors)
             {
-                message << e << std::endl;
+                msg << e << std::endl;
             }
             return 8; // System error exit
         }
@@ -1054,12 +1064,11 @@ int main(int argv, char** argc)
         {
             for (const auto& e : context.errors)
             {
-                message << e << std::endl;
+                msg << e << std::endl;
             }
             return 1; // Parse error exit
         }
 
-        checkConfig(context);
         checkShaderMappings(context);
         checkShaderStages(context);
 
@@ -1067,7 +1076,7 @@ int main(int argv, char** argc)
         {
             for (const auto& e : context.errors)
             {
-                message << e << std::endl;
+                msg << e << std::endl;
             }
             return 2; // Consistency error exit
         }
@@ -1077,14 +1086,14 @@ int main(int argv, char** argc)
         exportShade(context);
 
         // Finaly create .material
-        if (context.confType == RW_MATERIAL)
+        if (context.config.type == RW_MATERIAL)
         {
             exportMaterial(context);
         }
     }
     catch (const std::exception& e)
     {
-        message << e.what() << std::endl;
+        msg << e.what() << std::endl;
         return 5; // Any error
     }
 }

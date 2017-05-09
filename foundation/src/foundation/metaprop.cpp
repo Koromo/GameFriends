@@ -147,12 +147,12 @@ void MetaPropFile::read(const std::string& path)
             {
                 if (currentGroup.name() == "_Header")
                 {
-                    auther_ = currentGroup.prop("Auther")[0];
-                    comment_ = currentGroup.prop("Comment")[0];
+                    auther_ = currentGroup.get("Auther")[0];
+                    comment_ = currentGroup.get("Comment")[0];
                 }
                 else
                 {
-                    addGroup(currentGroup);
+                    add(currentGroup);
                 }
             }
 
@@ -181,7 +181,7 @@ void MetaPropFile::read(const std::string& path)
                 prop[i] = tokens[i + 1];
             }
 
-            currentGroup.addProp(prop);
+            currentGroup.add(prop);
         }
     }
 
@@ -190,12 +190,12 @@ void MetaPropFile::read(const std::string& path)
     {
         if (currentGroup.name() == "_Header")
         {
-            auther_ = currentGroup.prop("Auther")[0];
-            comment_ = currentGroup.prop("Comment")[0];
+            auther_ = currentGroup.get("Auther")[0];
+            comment_ = currentGroup.get("Comment")[0];
         }
         else
         {
-            addGroup(currentGroup);
+            add(currentGroup);
         }
     }
 }
@@ -233,17 +233,17 @@ std::string MetaProperty::asString() const
     std::string asString;
 
     asString += inText(name_) + ":";
-    for (const auto& t : tokens_)
+    for (const auto& v : values_)
     {
         asString += " ";
-        asString += inText(t);
+        asString += inText(v);
     }
     return asString;
 }
 
 MetaProperty::MetaProperty(const std::string& name)
     : name_(name)
-    , tokens_()
+    , values_()
 {
 }
 
@@ -257,63 +257,69 @@ std::string MetaProperty::name() const
     return name_;
 }
 
+size_t MetaProperty::size() const
+{
+    return values_.size();
+}
+
+std::string MetaProperty::get(size_t i) const
+{
+    check(i < values_.size());
+    return values_[i];
+}
+
+int MetaProperty::stoi(size_t i) const
+{
+    return std::stoi(get(i));
+}
+
+long MetaProperty::stol(size_t i) const
+{
+    return std::stol(get(i));
+}
+
+unsigned long MetaProperty::stoul(size_t i) const
+{
+    return std::stoul(get(i));
+}
+
+long long MetaProperty::stoll(size_t i) const
+{
+    return std::stoll(get(i));
+}
+
+unsigned long long MetaProperty::stoull(size_t i) const
+{
+    return std::stoull(get(i));
+}
+
+float MetaProperty::stof(size_t i) const
+{
+    return std::stof(get(i));
+}
+
+double MetaProperty::stod(size_t i) const
+{
+    return std::stod(get(i));
+}
+
+long double MetaProperty::stold(size_t i) const
+{
+    return std::stoi(get(i));
+}
+
 const std::string& MetaProperty::operator [](size_t i) const
 {
-    if (i >= tokens_.size())
+    if (i >= values_.size())
     {
-        tokens_.resize(i + 1);
+        values_.resize(i + 1);
     }
-    return tokens_[i];
+    return values_[i];
 }
 
 std::string& MetaProperty::operator [](size_t i)
 {
     return const_cast<std::string&>(static_cast<const MetaProperty*>(this)->operator[](i));
-}
-
-int MetaProperty::getInt(size_t i) const
-{
-    return std::stoi(this->operator[](i));
-}
-
-long MetaProperty::getLong(size_t i) const
-{
-    return std::stol(this->operator[](i));
-}
-
-unsigned long MetaProperty::getULong(size_t i) const
-{
-    return std::stoul(this->operator[](i));
-}
-
-long long MetaProperty::getLLong(size_t i) const
-{
-    return std::stoll(this->operator[](i));
-}
-
-unsigned long long MetaProperty::getULLong(size_t i) const
-{
-    return std::stoull(this->operator[](i));
-}
-
-float MetaProperty::getFloat(size_t i) const
-{
-    return std::stof(this->operator[](i));
-}
-
-double MetaProperty::getDouble(size_t i) const
-{
-    return std::stod(this->operator[](i));
-}
-
-long double MetaProperty::getLDouble(size_t i) const
-{
-    return std::stoi(this->operator[](i));
-}
-
-size_t MetaProperty::size() const
-{
-    return tokens_.size();
 }
 
 MetaPropGroup::MetaPropGroup(const std::string& name)
@@ -332,21 +338,20 @@ std::string MetaPropGroup::name() const
     return name_;
 }
 
-bool MetaPropGroup::hasProp(const std::string& name) const
+bool MetaPropGroup::has(const std::string& name) const
 {
     return propTable_.find(name) != std::cend(propTable_);
 }
 
-const MetaProperty& MetaPropGroup::prop(const std::string& name) const
+void MetaPropGroup::add(const MetaProperty& prop)
 {
-    check(hasProp(name));
-    return propTable_.find(name)->second;
+    propTable_.emplace(prop.name(), prop);
 }
 
-void MetaPropGroup::addProp(const MetaProperty& prop)
+const MetaProperty& MetaPropGroup::get(const std::string& name) const
 {
-    check(!prop.name().empty());
-    propTable_.emplace(prop.name(), prop);
+    check(has(name));
+    return propTable_.find(name)->second;
 }
 
 std::string MetaPropFile::auther() const
@@ -369,21 +374,20 @@ void MetaPropFile::setComment(const std::string& comment)
     comment_ = comment;
 }
 
-bool MetaPropFile::hasGroup(const std::string& name) const
+bool MetaPropFile::has(const std::string& name) const
 {
     return groupTable_.find(name) != std::cend(groupTable_);
 }
 
-const MetaPropGroup& MetaPropFile::group(const std::string& name) const
+void MetaPropFile::add(const MetaPropGroup& group)
 {
-    check(hasGroup(name));
-    return groupTable_.find(name)->second;
+    groupTable_[group.name()] = group;
 }
 
-void MetaPropFile::addGroup(const MetaPropGroup& group)
+const MetaPropGroup& MetaPropFile::get(const std::string& name) const
 {
-    check(!group.name().empty());
-    groupTable_[group.name()] = group;
+    check(has(name));
+    return groupTable_.find(name)->second;
 }
 
 GF_NAMESPACE_END

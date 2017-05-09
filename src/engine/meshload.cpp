@@ -15,15 +15,15 @@ namespace
     template <class T>
     bool getFloatBuffer(const MetaPropGroup& Vertex, const std::string& propName, std::vector<T>& buffer)
     {
-        if (Vertex.hasProp(propName))
+        if (Vertex.has(propName))
         {
             buffer.clear();
-            const auto& V = Vertex.prop(propName);
+            const auto& V = Vertex.get(propName);
             const auto size = V.size();
             buffer.resize(size);
             for (size_t i = 0; i < size; ++i)
             {
-                buffer[i] = V.getFloat(i);
+                buffer[i] = V.stof(i);
             }
             return true;
         }
@@ -33,15 +33,15 @@ namespace
     template <class T>
     bool getIntBuffer(const MetaPropGroup& Vertex, const std::string& propName, std::vector<T>& buffer)
     {
-        if (Vertex.hasProp(propName))
+        if (Vertex.has(propName))
         {
             buffer.clear();
-            const auto& V = Vertex.prop(propName);
+            const auto& V = Vertex.get(propName);
             const auto size = V.size();
             buffer.resize(size);
             for (size_t i = 0; i < size; ++i)
             {
-                buffer[i] = V.getInt(i);
+                buffer[i] = V.stoi(i);
             }
             return true;
         }
@@ -71,11 +71,12 @@ bool Mesh::loadImpl()
         std::vector<unsigned short> ints;
 
         // @Vertex
-        enforce<MeshLoadException>(file.hasGroup("Vertex"), ".mesh requires @Vertex.");
-        const auto& Vertex = file.group("Vertex");
+        enforce<MeshLoadException>(file.has("Vertex"), ".mesh requires @Vertex.");
+        const auto& Vertex = file.get("Vertex");
 
-        enforce<MeshLoadException>(Vertex.hasProp("Topology"), ".mesh requires Topology: in @Vertex.");
-        vertexData_->setTopology(static_cast<PrimitiveTopology>(Vertex.prop("Topology").getInt(0)));
+        enforce<MeshLoadException>(Vertex.has("Topology") && Vertex.get("Topology").size() >= 1,
+            ".mesh requires Topology: <topology> in @Vertex.");
+        vertexData_->setTopology(static_cast<PrimitiveTopology>(Vertex.get("Topology").stoi(0)));
 
         if (getFloatBuffer(Vertex, "V", floats))
         {
@@ -99,21 +100,25 @@ bool Mesh::loadImpl()
             vertexData_->setIndices(ints.data(), ints.size() * sizeof(unsigned short));
         }
 
-        for (int i = 0; file.hasGroup("SubMesh" + std::to_string(i)); ++i)
+        for (int i = 0; file.has("SubMesh" + std::to_string(i)); ++i)
         {
-            const auto& SubMeshGroup = file.group("SubMesh" + std::to_string(i));
+            const auto& SubMeshGroup = file.get("SubMesh" + std::to_string(i));
 
-            enforce<MeshLoadException>(SubMeshGroup.hasProp("Name"), ".mesh requires Name: in @SubMesh.");
-            const auto name = SubMeshGroup.prop("Name")[0];
+            enforce<MeshLoadException>(SubMeshGroup.has("Name") && SubMeshGroup.get("Name").size() >= 1,
+                ".mesh requires Name: <name> in @SubMesh.");
+            const auto name = SubMeshGroup.get("Name")[0];
 
-            enforce<MeshLoadException>(SubMeshGroup.hasProp("Material"), ".mesh requires Material: in @SubMesh.");
-            const auto materialPath = SubMeshGroup.prop("Material")[0];
+            enforce<MeshLoadException>(SubMeshGroup.has("Material") && SubMeshGroup.get("Material").size() >= 1,
+                ".mesh requires Material: <path> in @SubMesh.");
+            const auto materialPath = SubMeshGroup.get("Material")[0];
 
-            enforce<MeshLoadException>(SubMeshGroup.hasProp("Indexed"), ".mesh requires Indexed: in @SubMesh.");
-            const auto indexed = !!SubMeshGroup.prop("Indexed").getInt(0);
+            enforce<MeshLoadException>(SubMeshGroup.has("Indexed") && SubMeshGroup.get("Indexed").size() >= 1,
+                ".mesh requires Indexed: <bool> in @SubMesh.");
+            const auto indexed = !!SubMeshGroup.get("Indexed").stoi(0);
 
-            enforce<MeshLoadException>(SubMeshGroup.hasProp("Range"), ".mesh requires Range: in @SubMesh.");
-            const auto& Range = SubMeshGroup.prop("Range");
+            enforce<MeshLoadException>(SubMeshGroup.has("Range") && SubMeshGroup.get("Range").size() >= 2,
+                ".mesh requires Range: <begin> <count> in @SubMesh.");
+            const auto& Range = SubMeshGroup.get("Range");
 
             const auto material = resourceManager.template obtain<Material>(materialPath);
             material->load();
@@ -123,8 +128,8 @@ bool Mesh::loadImpl()
             subMesh.name = name;
             subMesh.material = material;
             subMesh.indexed = indexed;
-            subMesh.offset = Range.getInt(0);
-            subMesh.count = Range.getInt(1);
+            subMesh.offset = Range.stoi(0);
+            subMesh.count = Range.stoi(1);
 
             addSubMesh(subMesh);
         }

@@ -10,9 +10,9 @@ This is
 Config {
     // shade type, output only .shade file. In this case, initial values of parameters are ignored.
     // material type, output .material with .shade
-    type = shade;	// shade or material
-    name = reference;
-    output = files/output;	// output path 
+    type = shade;	// shade or material (material)
+    name = reference;	//  (<filename>.matcode)
+    output = files/output;	// (current directory of .exe) 
 }
 
 Parameters {

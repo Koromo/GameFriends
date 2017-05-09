@@ -44,12 +44,13 @@ bool ShadeModel::loadImpl()
         std::unordered_map<std::string, MatParamType> paramTypes;
 
         // @Parameters
-        enforce<ShadeModelLoadException>(file.hasGroup("Parameters"), ".shade requires @Parameters.");
-        const auto& Parameters = file.group("Parameters");
+        enforce<ShadeModelLoadException>(file.has("Parameters"), ".shade requires @Parameters.");
+        const auto& Parameters = file.get("Parameters");
 
-        for (int i = 0; Parameters.hasProp(std::to_string(i)); ++i)
+        for (int i = 0; Parameters.has(std::to_string(i)); ++i)
         {
-            const auto& prop = Parameters.prop(std::to_string(i));
+            const auto& prop = Parameters.get(std::to_string(i));
+            enforce<ShadeModelLoadException>(prop.size() >= 2, "parameter requires <type> <name>.");
 
             MatParamType type;
             const auto name = prop[1];
@@ -62,21 +63,23 @@ bool ShadeModel::loadImpl()
         // ShaderStages
         const auto parseShaderStage = [&, this](ShaderType stageType, const std::string& stageName)
         {
-            if (file.hasGroup(stageName))
+            if (file.has(stageName))
             {
-                const auto& SS = file.group(stageName);
+                const auto& SS = file.get(stageName);
 
-                enforce<ShadeModelLoadException>(SS.hasProp("Compile"),
-                    ".shade requires Compile: in @" + stageName + ").");
-                const auto& Compile = SS.prop("Compile");
+                enforce<ShadeModelLoadException>(SS.has("Compile") && SS.get("Compile").size() >= 2,
+                    ".shade requires Compile: <path> <entry> in @" + stageName + ").");
+                const auto& Compile = SS.get("Compile");
 
                 const auto path = Compile[0];
                 const auto entry = Compile[1];
                 program_.compile(stageType, path, entry);
 
-                for (int i = 0; SS.hasProp("Map" + std::to_string(i)); ++i)
+                for (int i = 0; SS.has("Map" + std::to_string(i)); ++i)
                 {
-                    const auto& Map = SS.prop("Map" + std::to_string(i));
+                    const auto& Map = SS.get("Map" + std::to_string(i));
+                    enforce<ShadeModelLoadException>(Compile.size() >= 2, "Map: requires <param> <map to> : in @" + stageName + ").");
+
                     const auto param = Map[0];
                     const auto mapTo = Map[1];
 
@@ -107,44 +110,40 @@ bool ShadeModel::loadImpl()
         drawCall_.setShaders(program_);
 
         // @DepthStencil
-        if (file.hasGroup("DepthStencil"))
-        {
-            DepthState state = DepthState::DEFAULT;
-            const auto& DepthStencil = file.group("DepthStencil");
+        DepthState depthState = DepthState::DEFAULT;
 
-            if (DepthStencil.hasProp("DepthEnable"))
-            {
-                state.depthEnable = !!DepthStencil.prop("DepthEnable").getInt(0);
-            }
-            if (DepthStencil.hasProp("DepthFun"))
-            {
-                state.depthFun = static_cast<ComparisonFun>(DepthStencil.prop("DepthFun").getInt(0));
-            }
+        enforce<ShadeModelLoadException>(file.has("DepthStencil"), ".shade requires @DepthStencil.");
+        const auto& DepthStencil = file.get("DepthStencil");
 
-            drawCall_.setDepthState(state);
-        }
+        enforce<ShadeModelLoadException>(DepthStencil.has("DepthEnable") && DepthStencil.get("DepthEnable").size() >= 1,
+            "@DepthStencil requires DepthEnable: <bool>.");
+        depthState.depthEnable = !!DepthStencil.get("DepthEnable").stoi(0);
+
+        enforce<ShadeModelLoadException>(DepthStencil.has("DepthFun") && DepthStencil.get("DepthFun").size() >= 1,
+            "@DepthStencil requires DepthFun: <fun>.");
+        depthState.depthFun = static_cast<ComparisonFun>(DepthStencil.get("DepthFun").stoi(0));
+
+        drawCall_.setDepthState(depthState);
 
         // @Rasterizer
-        if (file.hasGroup("Rasterizer"))
-        {
-            RasterizerState state = RasterizerState::DEFAULT;
-            const auto& Rasterizer = file.group("Rasterizer");
+        RasterizerState rasterizerState = RasterizerState::DEFAULT;
 
-            if (Rasterizer.hasProp("Fill"))
-            {
-                state.fillMode = static_cast<FillMode>(Rasterizer.prop("Fill").getInt(0));
-            }
-            if (Rasterizer.hasProp("Cull"))
-            {
-                state.cullFace = static_cast<CullingFace>(Rasterizer.prop("Cull").getInt(0));
-            }
-            if (Rasterizer.hasProp("DepthClip"))
-            {
-                state.depthClip = !!Rasterizer.prop("DepthClip").getInt(0);
-            }
+        enforce<ShadeModelLoadException>(file.has("Rasterizer"), ".shade requires @Rasterizer.");
+        const auto& Rasterizer = file.get("Rasterizer");
 
-            drawCall_.setRasterizerState(state);
-        }
+        enforce<ShadeModelLoadException>(Rasterizer.has("Fill") && Rasterizer.get("Fill").size() >= 1,
+            "@Rasterizer requires Fill: <fill>.");
+        rasterizerState.fillMode = static_cast<FillMode>(Rasterizer.get("Fill").stoi(0));
+
+        enforce<ShadeModelLoadException>(Rasterizer.has("Cull") && Rasterizer.get("Cull").size() >= 1,
+            "@Rasterizer requires Cull: <cull>.");
+        rasterizerState.cullFace = static_cast<CullingFace>(Rasterizer.get("Cull").stoi(0));
+
+        enforce<ShadeModelLoadException>(Rasterizer.has("DepthClip") && Rasterizer.get("DepthClip").size() >= 1,
+            "@Rasterizer requires DepthClip: <bool>.");
+        rasterizerState.depthClip = !!Rasterizer.get("DepthClip").stoi(0);
+
+        drawCall_.setRasterizerState(rasterizerState);
     }
     catch (const ResourceException& e)
     {
@@ -182,11 +181,12 @@ bool Material::loadImpl()
     try
     {
         // @Shade
-        enforce<MaterialLoadException>(file.hasGroup("Shade"), ".material requires @Shade.");
-        const auto& Shade = file.group("Shade");
+        enforce<MaterialLoadException>(file.has("Shade"), ".material requires @Shade.");
+        const auto& Shade = file.get("Shade");
 
-        enforce<MaterialLoadException>(Shade.hasProp("Path"), ".material requires Path: in @Shade.");
-        const auto shadeModelPath = Shade.prop("Path")[0];
+        enforce<MaterialLoadException>(Shade.has("Path") && Shade.get("Path").size() >= 1,
+            ".material requires Path: in @Shade.");
+        const auto shadeModelPath = Shade.get("Path")[0];
 
         const auto model = resourceManager.template obtain<ShadeModel>(shadeModelPath);
         model->load();
@@ -219,9 +219,9 @@ bool Material::loadImpl()
 
             auto& holder = params_[name];
 
-            enforce<MaterialLoadException>(Shade.hasProp(name),
+            enforce<MaterialLoadException>(Shade.has(name),
                 ".material requires parameter value " + name + " in @Shade.");
-            const auto& prop = Shade.prop(name);
+            const auto& prop = Shade.get(name);
 
             if (isNumeric(type))
             {
@@ -231,13 +231,15 @@ bool Material::loadImpl()
                     const auto floats = reinterpret_cast<float*>(holder.numeric.get());
                     for (size_t n = 0; n < sizeofMatParam(type) / sizeof(float) && n < propSize; ++n)
                     {
-                        floats[n] = prop.getFloat(n);
+                        floats[n] = prop.stof(n);
                     }
                 }
                 shadeModelIn_->updateNumeric(name, holder.numeric.get(), sizeofMatParam(type));
             }
             else
             {
+                enforce<MaterialLoadException>(prop.size() >= 1,
+                    name + " requires texture path in @Shade.");
                 const auto texPath = prop[0];
                 const auto tex = resourceManager.template obtain<MediaTexture>(texPath);
                 tex->load();

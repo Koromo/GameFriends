@@ -20,7 +20,7 @@ class MetaProperty
 {
 private:
     std::string name_;
-    mutable std::vector<std::string> tokens_;
+    mutable std::vector<std::string> values_;
 
 public:
     MetaProperty() = default;
@@ -28,6 +28,18 @@ public:
 
     void setName(const std::string& name);
     std::string name() const;
+
+    size_t size() const;
+
+    std::string get(size_t i) const;
+    int stoi(size_t i) const;
+    long stol(size_t i) const;
+    unsigned long stoul(size_t i) const;
+    long long stoll(size_t i) const;
+    unsigned long long stoull(size_t i) const;
+    float stof(size_t i) const;
+    double stod(size_t i) const;
+    long double stold(size_t i) const;
 
     const std::string& operator [](size_t i) const;
     std::string& operator [](size_t i);
@@ -37,17 +49,6 @@ public:
     {
         this->operator[](i) = std::to_string(val);
     }
-
-    int getInt(size_t i) const;
-    long getLong(size_t i) const;
-    unsigned long getULong(size_t i) const;
-    long long getLLong(size_t i) const;
-    unsigned long long getULLong(size_t i) const;
-    float getFloat(size_t i) const;
-    double getDouble(size_t i) const;
-    long double getLDouble(size_t i) const;
-
-    size_t size() const;
 
     std::string asString() const;
 };
@@ -65,9 +66,9 @@ public:
     void setName(const std::string& name);
     std::string name() const;
 
-    bool hasProp(const std::string& name) const;
-    const MetaProperty& prop(const std::string& name) const;
-    void addProp(const MetaProperty& prop);
+    bool has(const std::string& name) const;
+    void add(const MetaProperty& prop);
+    const MetaProperty& get(const std::string& name) const;
 
     std::string asString() const;
 };
@@ -86,9 +87,9 @@ public:
     void setAuther(const std::string& auther);
     void setComment(const std::string& comment);
 
-    bool hasGroup(const std::string& name) const;
-    const MetaPropGroup& group(const std::string& name) const;
-    void addGroup(const MetaPropGroup& group);
+    bool has(const std::string& name) const;
+    void add(const MetaPropGroup& group);
+    const MetaPropGroup& get(const std::string& name) const;
 
     void read(const std::string& path) noexcept(false);
     void write(const std::string& path) noexcept(false);

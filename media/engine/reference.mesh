@@ -1,9 +1,7 @@
-@_Header
-Auther:
-Comment:
-
 @Vertex
 Topology: 2	# 0:lines 1:lineStrip 2:tris 3:triStrip
+
+# Each vertex types are optional
 V:	# Positions float3
 N:	# Normals float3
 C:	# Colors float4

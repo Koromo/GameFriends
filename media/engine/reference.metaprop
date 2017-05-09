@@ -5,7 +5,7 @@
 # The word _Header and symbol @,: are special notaion, therefore you can not use them arbitary.
 # Property is described as array, each element needs space prefix for tokenization.
 
-# You must describe header as follows
+# You can describe header as follows
 @_Header
 Auther: SugarHeart	# Array {SugarHeart}
 Comment: "Who are you"	# Array {Who are you}. The size of array is 1.
