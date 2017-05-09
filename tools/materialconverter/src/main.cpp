@@ -443,7 +443,7 @@ struct Parser
                         it->second->parse(context, mapping);
 
                         mapping.isRawValue = true;
-                        mapping.rawValue.name = "_n" + std::to_string(generateUniqueID());
+                        mapping.rawValue.name = "_lambda" + std::to_string(generateUniqueID());
                     }
                     else
                     {
@@ -838,9 +838,175 @@ void checkShaderStages(Context& context)
     }
 }
 
+void exportShade(const Context& context)
+{
+    int i;
+
+    // @_Header
+    MetaPropFile mpFile;
+    mpFile.setAuther("MaterialConverter");
+    mpFile.setComment("Generated from " + context.path);
+
+    // @Parameters
+    MetaPropGroup Parameters("Parameters");
+    i = 0;
+
+    for (const auto& param : context.paramTable)
+    {
+        MetaProperty prop(std::to_string(i));
+        prop[0] = param.second.type;
+        prop[1] = param.second.name;
+        Parameters.addProp(prop);
+        ++i;
+    }
+
+    for (const auto& shader : context.shaders)
+    {
+        for (const auto& mapping : shader.second.mappings)
+        {
+            if (mapping.isRawValue)
+            {
+                MetaProperty prop(std::to_string(i));
+                prop[0] = mapping.rawValue.type;
+                prop[1] = mapping.rawValue.name;
+                Parameters.addProp(prop);
+                ++i;
+            }
+        }
+    }
+
+    mpFile.addGroup(Parameters);
+
+    // ShadersStages
+    const auto buildShaderStage = [&](const ShaderReference_t& shaderRef, const std::string& stageName)
+    {
+        MetaPropGroup S(stageName);
+
+        MetaProperty Compile("Compile");
+        Compile[0] = shaderRef.path;
+        Compile[1] = shaderRef.entry;
+
+        S.addProp(Compile);
+
+        i = 0;
+        for (const auto& mapping : shaderRef.mappings)
+        {
+            MetaProperty Map("Map" + std::to_string(i));
+
+            std::string paramName;
+            if (mapping.isRawValue)
+            {
+                paramName = mapping.rawValue.name;
+            }
+            else
+            {
+                paramName = mapping.param;
+            }
+
+            Map[0] = paramName;
+            Map[1] = mapping.mapTo;
+
+            S.addProp(Map);
+            ++i;
+        }
+
+        mpFile.addGroup(S);
+    };
+
+    if (!context.pass.vs.empty())
+    {
+        const auto s = context.shaders.find(context.pass.vs);
+        buildShaderStage(s->second, "VS");
+    }
+    if (!context.pass.gs.empty())
+    {
+        const auto s = context.shaders.find(context.pass.gs);
+        buildShaderStage(s->second, "GS");
+    }
+    if (!context.pass.ps.empty())
+    {
+        const auto s = context.shaders.find(context.pass.ps);
+        buildShaderStage(s->second, "PS");
+    }
+
+    // @DepthStencil
+    MetaPropGroup DepthStencil("DepthStencil");
+    MetaProperty DepthEnable("DepthEnable");
+    MetaProperty DepthFun("DepthFun");
+
+    DepthEnable.set(0, context.pass.depthEnable);
+    DepthFun.set(0, context.pass.depthFun);
+
+    DepthStencil.addProp(DepthEnable);
+    DepthStencil.addProp(DepthFun);
+    mpFile.addGroup(DepthStencil);
+
+    // @Rasterizer
+    MetaPropGroup Rasterizer("Rasterizer");
+    MetaProperty Fill("Fill");
+    MetaProperty Cull("Cull");
+    MetaProperty DepthClip("DepthClip");
+
+    Fill.set(0, context.pass.fill);
+    Cull.set(0, context.pass.cull);
+    DepthClip.set(0, context.pass.depthClip);
+
+    Rasterizer.addProp(Fill);
+    Rasterizer.addProp(Cull);
+    Rasterizer.addProp(DepthClip);
+    mpFile.addGroup(Rasterizer);
+
+    mpFile.write(context.confOut + "/" + context.confName + ".shade");
+}
+
+void exportMaterial(const Context& context)
+{
+    int i;
+
+    // @_Header
+    MetaPropFile mpFile;
+    mpFile.setAuther("MaterialConverter");
+    mpFile.setComment("Generated from " + context.path);
+
+    // @Shade
+    MetaPropGroup Shade("Shade");
+    i = 0;
+
+    for (const auto& param : context.paramTable)
+    {
+        MetaProperty prop(param.second.name);
+        for (size_t j = 0; j < param.second.value.size(); ++j)
+        {
+            prop[j] = param.second.value[j];
+        }
+        Shade.addProp(prop);
+        ++i;
+    }
+
+    for (const auto& shader : context.shaders)
+    {
+        for (const auto& mapping : shader.second.mappings)
+        {
+            if (mapping.isRawValue)
+            {
+                MetaProperty prop(mapping.rawValue.name);
+                for (size_t j = 0; j < mapping.rawValue.value.size(); ++j)
+                {
+                    prop[j] = mapping.rawValue.value[j];
+                }
+                Shade.addProp(prop);
+                ++i;
+            }
+        }
+    }
+
+    mpFile.addGroup(Shade);
+    mpFile.write(context.confOut + "/" + context.confName + ".material");
+}
+
 int main(int argv, char** argc)
 {
-    const std::string messagePath = "compilemsg.txt";
+    const std::string messagePath = "MaterialConverterMsg.txt";
     std::ofstream message(messagePath);
     if (!message.is_open())
     {
@@ -851,7 +1017,6 @@ int main(int argv, char** argc)
     if (argv != 2)
     {
         message << "Usage: " << argc[0] << " path(.matcode)" << std::endl;
-        message.close();
         return 12; // Usage error exit
     }
 
@@ -909,162 +1074,12 @@ int main(int argv, char** argc)
 
         // Now, we can create output file.
         // First, create .shade
-        int i;
-
-        // @_Header
-        MetaPropFile mpFile;
-        mpFile.setAuther("MaterialConverter");
-        mpFile.setComment("Generated from " + inputPath);
-
-        // @Parameters
-        MetaPropGroup Parameters("Parameters");
-        i = 0;
-
-        for (const auto& param : context.paramTable)
-        {
-            MetaProperty prop(std::to_string(i));
-            prop[0] = param.second.type;
-            prop[1] = param.second.name;
-            Parameters.addProp(prop);
-            ++i;
-        }
-
-        for (const auto& shader : context.shaders)
-        {
-            for (const auto& mapping : shader.second.mappings)
-            {
-                if (mapping.isRawValue)
-                {
-                    MetaProperty prop(std::to_string(i));
-                    prop[0] = mapping.rawValue.type;
-                    prop[1] = mapping.rawValue.name;
-                    Parameters.addProp(prop);
-                    ++i;
-                }
-            }
-        }
-
-        mpFile.addGroup(Parameters);
-
-        // ShadersStages
-        const auto buildShaderStage = [&](const ShaderReference_t& shaderRef, const std::string& stageName)
-        {
-            MetaPropGroup S(stageName);
-
-            MetaProperty Compile("Compile");
-            Compile[0] = shaderRef.path;
-            Compile[1] = shaderRef.entry;
-
-            S.addProp(Compile);
-
-            i = 0;
-            for (const auto& mapping : shaderRef.mappings)
-            {
-                MetaProperty Map("Map" + std::to_string(i));
-
-                std::string paramName;
-                if (mapping.isRawValue)
-                {
-                    paramName = mapping.rawValue.name;
-                }
-                else
-                {
-                    paramName = mapping.param;
-                }
-
-                Map[0] = paramName;
-                Map[1] = mapping.mapTo;
-
-                S.addProp(Map);
-                ++i;
-            }
-
-            mpFile.addGroup(S);
-        };
-
-        if (!context.pass.vs.empty())
-        {
-            const auto s = context.shaders.find(context.pass.vs);
-            buildShaderStage(s->second, "VS");
-        }
-        if (!context.pass.gs.empty())
-        {
-            const auto s = context.shaders.find(context.pass.gs);
-            buildShaderStage(s->second, "GS");
-        }
-        if (!context.pass.ps.empty())
-        {
-            const auto s = context.shaders.find(context.pass.ps);
-            buildShaderStage(s->second, "PS");
-        }
-
-        // @DepthStencil
-        MetaPropGroup DepthStencil("DepthStencil");
-        MetaProperty DepthEnable("DepthEnable");
-        MetaProperty DepthFun("DepthFun");
-        DepthEnable.set(0, context.pass.depthEnable);
-        DepthFun.set(0, context.pass.depthFun);
-        DepthStencil.addProp(DepthEnable);
-        DepthStencil.addProp(DepthFun);
-        mpFile.addGroup(DepthStencil);
-
-        // @Rasterizer
-        MetaPropGroup Rasterizer("Rasterizer");
-        MetaProperty Fill("Fill");
-        MetaProperty Cull("Cull");
-        MetaProperty DepthClip("DepthClip");
-        Fill.set(0, context.pass.fill);
-        Cull.set(0, context.pass.cull);
-        DepthClip.set(0, context.pass.depthClip);
-        Rasterizer.addProp(Fill);
-        Rasterizer.addProp(Cull);
-        Rasterizer.addProp(DepthClip);
-        mpFile.addGroup(Rasterizer);
-
-        mpFile.write(context.confOut + context.confName + ".shade");
+        exportShade(context);
 
         // Finaly create .material
         if (context.confType == RW_MATERIAL)
         {
-            // @_Header
-            mpFile = MetaPropFile();
-            mpFile.setAuther("MaterialConverter");
-            mpFile.setComment("Generated from " + inputPath);
-
-            // @Shade
-            MetaPropGroup Shade("Shade");
-            i = 0;
-
-            for (const auto& param : context.paramTable)
-            {
-                MetaProperty prop(param.second.name);
-                for (size_t j = 0; j < param.second.value.size(); ++j)
-                {
-                    prop[j] = param.second.value[j];
-                }
-                Shade.addProp(prop);
-                ++i;
-            }
-
-            for (const auto& shader : context.shaders)
-            {
-                for (const auto& mapping : shader.second.mappings)
-                {
-                    if (mapping.isRawValue)
-                    {
-                        MetaProperty prop(mapping.rawValue.name);
-                        for (size_t j = 0; j < mapping.rawValue.value.size(); ++j)
-                        {
-                            prop[j] = mapping.rawValue.value[j];
-                        }
-                        Shade.addProp(prop);
-                        ++i;
-                    }
-                }
-            }
-
-            mpFile.addGroup(Shade);
-            mpFile.write(context.confOut + context.confName + ".material");
+            exportMaterial(context);
         }
     }
     catch (const std::exception& e)

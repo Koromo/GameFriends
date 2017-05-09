@@ -126,8 +126,8 @@ struct Context
 
 inline size_t generateUniqueID()
 {
-    static unsigned short i = -1;
-    return i--;
+    static unsigned i = 0;
+    return i++;
 }
 
 inline void error(Context& context, const std::string& msg)
