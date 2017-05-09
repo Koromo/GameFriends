@@ -1,5 +1,4 @@
 #include "drawcall.h"
-#include "shaderprogram.h"
 #include "pixelbuffer.h"
 #include "renderstate.h"
 #include "pipeline.h"
@@ -12,6 +11,7 @@ OptimizedDrawCall::OptimizedDrawCall()
     , renderTarget_(CPU_DESCRIPTOR_UNKOWN)
     , depthStencil_(CPU_DESCRIPTOR_UNKOWN)
     , viewport_{}
+    , shaderSignature_{}
     , descriptorHeaps_()
     , rootParameters_()
     , vertices_{}
@@ -54,8 +54,8 @@ void OptimizedDrawCall::setShaders(const ShaderProgram& shaders)
 {
     psoDesc_.VS = shaders.shaderStage(ShaderType::vertex); 
     psoDesc_.GS = shaders.shaderStage(ShaderType::geometry); 
-    psoDesc_.PS = shaders.shaderStage(ShaderType::pixel); 
-    psoDesc_.pRootSignature = &shaders.rootSignature();
+    psoDesc_.PS = shaders.shaderStage(ShaderType::pixel);
+    shaderSignature_ = shaders.shaderSignatures();
 }
 
 void OptimizedDrawCall::setDepthState(const DepthState& ds)
@@ -90,6 +90,8 @@ void OptimizedDrawCall::setViewport(const Viewport& vp)
 
 void OptimizedDrawCall::trigger(ID3D12GraphicsCommandList& list) const
 {
+    psoDesc_.pRootSignature = &RootSignatureObtain()(shaderSignature_);
+
     auto& pso = GraphicsPipelineStateObtain()(psoDesc_);
     list.SetPipelineState(&pso);
     list.SetGraphicsRootSignature(psoDesc_.pRootSignature);

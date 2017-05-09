@@ -8,14 +8,9 @@
 
 GF_NAMESPACE_BEGIN
 
-RootSignatureObtain::RootSignatureObtain(const EachShaderSignature& sig)
-    : eachSig_(sig)
+ID3D12RootSignature& RootSignatureObtain::operator()(const EachShaderSignature& sig) const
 {
-}
-
-ID3D12RootSignature& RootSignatureObtain::operator()() const
-{
-    return renderSystem.rootSignatures().obtain(eachSig_);
+    return renderSystem.rootSignatures().obtain(sig);
 }
 
 void RootSignatureCache::construct(ID3D12Device* device)
@@ -126,15 +121,15 @@ ID3D12RootSignature& RootSignatureCache::obtain(const EachShaderSignature& key)
                 GF_LOG_WARN(msg);
                 err->Release();
             }
-            GF_LOG_WARN("Failed to serialize root signature.");
-            throw Direct3DException(msg);
+            GF_LOG_ERROR("Errored to serialize root signature.");
+            throw Direct3DError(msg);
         }
 
         ID3D12RootSignature* rs;
         if (FAILED(device_->CreateRootSignature(0, rsBlob->GetBufferPointer(), rsBlob->GetBufferSize(), IID_PPV_ARGS(&rs))))
         {
-            GF_LOG_WARN("Failed to create root signature.");
-            throw Direct3DException("Failed to create the ID3D12RootSignature.");
+            GF_LOG_ERROR("Errored to create root signature.");
+            throw Direct3DError("Failed to create the ID3D12RootSignature.");
         }
         rs->SetName(L"RootSignature");
 

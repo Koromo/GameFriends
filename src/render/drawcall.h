@@ -1,6 +1,7 @@
 #ifndef GAMEFRIENDS_DRAWCALL_H
 #define GAMEFRIENDS_DRAWCALL_H
 
+#include "rootsignature.h"
 #include "shaderprogram.h"
 #include "vertexdata.h"
 #include "foundation/prerequest.h"
@@ -16,10 +17,11 @@ struct Viewport;
 class OptimizedDrawCall
 {
 private:
-    D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc_;
+    mutable D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc_;
     D3D12_CPU_DESCRIPTOR_HANDLE renderTarget_;
     D3D12_CPU_DESCRIPTOR_HANDLE depthStencil_;
     D3D12_VIEWPORT viewport_;
+    EachShaderSignature shaderSignature_;
     decltype(std::declval<ShaderParameters>().usedDescriptorHeaps()) descriptorHeaps_;
     decltype(std::declval<ShaderParameters>().rootParameters()) rootParameters_;
 
@@ -57,7 +59,7 @@ public:
     void setDepthTarget(PixelBuffer& dt);
     void setViewport(const Viewport& vp);
 
-    void trigger(ID3D12GraphicsCommandList& list) const;
+    void trigger(ID3D12GraphicsCommandList& list) const noexcept(false);
 
 private:
     void setVertexCommon(const VertexData& vertex, size_t instanceOffset, size_t instanceCount);

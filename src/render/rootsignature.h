@@ -25,14 +25,9 @@ struct EachShaderSignature
     ShaderSignature ps;
 };
 
-class RootSignatureObtain
+struct RootSignatureObtain
 {
-private:
-    EachShaderSignature eachSig_;
-
-public:
-    explicit RootSignatureObtain(const EachShaderSignature& sig);
-    ID3D12RootSignature& operator ()() const noexcept(false);
+    ID3D12RootSignature& operator ()(const EachShaderSignature& sig) const noexcept(false);
 };
 
 class RootSignatureCache

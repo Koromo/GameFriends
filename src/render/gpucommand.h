@@ -50,7 +50,7 @@ public:
     void clearRenderTarget(PixelBuffer& rt, const Color& clearColor);
     void clearDepthTarget(PixelBuffer& ds, float depth);
 
-    void triggerDrawCall(const OptimizedDrawCall& drawCall);
+    void triggerDrawCall(const OptimizedDrawCall& drawCall) noexcept(false);
 
     void transition(PixelBuffer& resource, PixelBufferState befor, PixelBufferState after);
 

@@ -84,7 +84,14 @@ void RenderWorld::draw(const RenderCamera& camera)
                 drawCall.setVertex(*vertexData, subMesh.offset, subMesh.count, 0, 1);
             }
 
-            graphics.triggerDrawCall(drawCall);
+            try
+            {
+                graphics.triggerDrawCall(drawCall);
+            }
+            catch (const Direct3DException& e)
+            {
+                GF_LOG_WARN("Failed to trigger draw call. {}", e.msg());
+            }
         }
     }
 }
@@ -112,7 +119,12 @@ void SceneAppContext::startup()
         graphicsCommandBuilder_->record(*frameResources_[frameIndex].graphicsCommands);
         copyCommandBuilder_->record(*copyCommands_);
     }
-    catch (const Exception& e)
+    catch (const Direct3DError& e)
+    {
+        GF_LOG_ERROR("SceneManager initialization error. {}", e.msg());
+        throw;
+    }
+    catch (const Direct3DException& e)
     {
         GF_LOG_ERROR("SceneManager initialization error. {}", e.msg());
         throw;

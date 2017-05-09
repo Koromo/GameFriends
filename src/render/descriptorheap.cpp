@@ -71,8 +71,8 @@ DescriptorHeap::Page DescriptorHeap::createNewPage(bool shaderVisible)
     ID3D12DescriptorHeap* heap;
     if (FAILED(device_->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&heap))))
     {
-        GF_LOG_WARN("Descriptor heap allocation error.");
-        throw Direct3DException("Failed to create ID3D12DescriptorHeap.");
+        GF_LOG_ERROR("Descriptor heap allocation error.");
+        throw Direct3DError("Failed to create ID3D12DescriptorHeap.");
     }
     heap->SetName(L"DescriptorHeap");
 

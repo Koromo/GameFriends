@@ -71,8 +71,8 @@ LinearAllocator::Page LinearAllocator::createNewPage()
     ID3D12Resource* resource;
     if (FAILED(device_->CreateCommittedResource(&heapProp, D3D12_HEAP_FLAG_NONE, &desc, state, nullptr, IID_PPV_ARGS(&resource))))
     {
-        GF_LOG_WARN("D3D12 committed resource linear allocation failed.");
-        throw Direct3DException("Failed to create the ID3D12Resource.");
+        GF_LOG_ERROR("D3D12 committed resource linear allocation error.");
+        throw Direct3DError("Failed to create the ID3D12Resource.");
     }
     resource->SetName(L"LinearBuffer");
 

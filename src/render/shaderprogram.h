@@ -130,7 +130,7 @@ public:
     void setModel(const std::string& model);
     void setEntry(const std::string& entry);
     void setMacros(std::initializer_list<ShaderMacro>& macros);
-    CompiledShader compile();
+    CompiledShader compile() noexcept(false);
 
 private:
     bool loadImpl();
@@ -147,11 +147,11 @@ public:
     ShaderProgram();
 
     void compile(ShaderType type, const std::string& path, const std::string& entry,
-        std::initializer_list<ShaderMacro>& macros = std::initializer_list<ShaderMacro>());
-    std::shared_ptr<ShaderParameters> createParameters() const;
+        std::initializer_list<ShaderMacro>& macros = std::initializer_list<ShaderMacro>()) noexcept(false);
+    std::shared_ptr<ShaderParameters> createParameters() const  noexcept(false);
 
     D3D12_SHADER_BYTECODE shaderStage(ShaderType type) const;
-    ID3D12RootSignature& rootSignature() const;
+    EachShaderSignature shaderSignatures() const;
 
 private:
     ShaderSignature signatureOf(ID3D12ShaderReflection& shader) const;

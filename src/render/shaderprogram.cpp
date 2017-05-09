@@ -1,5 +1,4 @@
 #include "shaderprogram.h"
-#include "rootsignature.h"
 #include "pixelbuffer.h"
 #include "rendersystem.h"
 #include "../engine/logging.h"
@@ -365,9 +364,9 @@ D3D12_SHADER_BYTECODE ShaderProgram::shaderStage(ShaderType type) const
     return shaders_[index(type)].code;
 }
 
-ID3D12RootSignature& ShaderProgram::rootSignature() const
+EachShaderSignature ShaderProgram::shaderSignatures() const
 {
-    return RootSignatureObtain(signatures_)();
+    return signatures_;
 }
 
 ShaderSignature ShaderProgram::signatureOf(ID3D12ShaderReflection& shader) const
