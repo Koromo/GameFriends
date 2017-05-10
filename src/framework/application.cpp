@@ -98,7 +98,7 @@ void Application::go()
     }
 
     // Resource
-    fileSystem.startup("media");
+    fileSystem.startup("asset");
     resourceManager.startup();
 
     // Audio
