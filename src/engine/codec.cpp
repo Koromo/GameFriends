@@ -87,7 +87,7 @@ namespace
     }
 }
 
-std::shared_ptr<Image> decodeBmp(const std::string& path_)
+std::shared_ptr<Image> decodeBmp(const EnginePath& path_)
 {
     const auto path = fileSystem.toOSPath(path_);
     auto file = enforce<FileException>(std::fopen(path.c_str(), "rb"), "Failed to open file (" + path + ").");

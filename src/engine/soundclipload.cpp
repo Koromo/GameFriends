@@ -1,5 +1,5 @@
 #include "../audio/soundclip.h"
-#include "../engine/logging.h"
+#include "logging.h"
 #include "foundation/exception.h"
 #include "foundation/string.h"
 
@@ -7,12 +7,12 @@ GF_NAMESPACE_BEGIN
 
 bool SoundClip::loadImpl()
 {
-    const auto tpath = charset(path().os);
+    const auto tpath = charset(osPath());
 
     const auto mmio = mmioOpen(const_cast<TCHAR*>(tpath.c_str()), nullptr, MMIO_READ);
     if (!mmio)
     {
-        GF_LOG_WARN("Failed to load sound clip {}.", path().os);
+        GF_LOG_WARN("Failed to load sound clip {}.", osPath());
         return false;
     }
     GF_SCOPE_EXIT{ mmioClose(mmio, 0); };

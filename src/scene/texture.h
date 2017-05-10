@@ -19,7 +19,7 @@ private:
     std::unique_ptr<PixelBuffer> resource_;
 
 public:
-    explicit MediaTexture(const FilePath& path);
+    explicit MediaTexture(const EnginePath& path);
     PixelBuffer& resource();
 
 private:

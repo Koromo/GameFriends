@@ -18,7 +18,7 @@ private:
     SoundFormat format_;
 
 public:
-    SoundClip(const FilePath& path);
+    SoundClip(const EnginePath& path);
     const unsigned char* data() const;
     size_t size() const;
     const SoundFormat& format() const;

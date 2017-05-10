@@ -39,7 +39,7 @@ private:
     SortedVector<SubMesh, SubMeshComp> subMeshes_;
 
 public:
-    explicit Mesh(const FilePath& path);
+    explicit Mesh(const EnginePath& path);
 
     void setVertexData(const std::shared_ptr<VertexData>& vertexData);
     void addSubMesh(const SubMesh& sm);

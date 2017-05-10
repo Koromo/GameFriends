@@ -14,33 +14,32 @@ public:
         : Error(msg) {}
 };
 
-struct FilePath
+struct EnginePath
 {
-    std::string relative;
-    std::string os;
+    std::string s;
+
+    EnginePath() = default;
+    explicit EnginePath(const std::string& p) : s(p) {};
 };
 
-bool operator ==(const FilePath& a, const FilePath& b);
-bool operator !=(const FilePath& a, const FilePath& b);
-bool operator <(const FilePath& a, const FilePath& b);
-bool operator <=(const FilePath& a, const FilePath& b);
-bool operator >(const FilePath& a, const FilePath& b);
-bool operator >=(const FilePath& a, const FilePath& b);
+bool operator ==(const EnginePath& a, const EnginePath& b);
+bool operator !=(const EnginePath& a, const EnginePath& b);
+bool operator <(const EnginePath& a, const EnginePath& b);
+bool operator <=(const EnginePath& a, const EnginePath& b);
+bool operator >(const EnginePath& a, const EnginePath& b);
+bool operator >=(const EnginePath& a, const EnginePath& b);
 
 class FileSystem
 {
 private:
-    std::string osRootPath_;
+    std::string engineRootPath_;
 
 public:
-    void startup(const std::string& rootDirectory) noexcept(false);
+    void startup(const std::string& engineRoot) noexcept(false);
     void shutdown();
 
-    bool isOSPath(const std::string& path) const;
-    std::string standard(const std::string& path) const;
-    std::string toOSPath(const std::string& path) const;
-    std::string toRelativePath(const std::string& path) const;
-    FilePath path(const std::string& path) const;
+    EnginePath standard(const EnginePath& path) const;
+    std::string toOSPath(const EnginePath& path) const;
 };
 
 extern FileSystem fileSystem;
@@ -50,11 +49,11 @@ GF_NAMESPACE_END
 namespace std
 {
     template <>
-    struct hash<GF_NAMESPACE::FilePath>
+    struct hash<GF_NAMESPACE::EnginePath>
     {
-        size_t operator ()(const GF_NAMESPACE::FilePath& p) const
+        size_t operator ()(const GF_NAMESPACE::EnginePath& p) const
         {
-            return std::hash<std::string>()(p.os);
+            return std::hash<std::string>()(p.s);
         }
     };
 }

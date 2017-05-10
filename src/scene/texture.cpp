@@ -7,7 +7,7 @@
 
 GF_NAMESPACE_BEGIN
 
-MediaTexture::MediaTexture(const FilePath& path)
+MediaTexture::MediaTexture(const EnginePath& path)
     : Resource(path)
     , image_()
     , resource_()
@@ -23,11 +23,11 @@ bool MediaTexture::loadImpl()
 {
     try
     {
-        image_ = decodeBmp(path().os);
+        image_ = decodeBmp(path());
     }
     catch (const Exception& e)
     {
-        GF_LOG_WARN("Failed to load texture {}. {}", path().os, e.msg());
+        GF_LOG_WARN("Failed to load texture {}. {}", osPath(), e.msg());
         return false;
     }
 

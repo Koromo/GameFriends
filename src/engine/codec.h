@@ -2,6 +2,7 @@
 #define GAMEFRIENDS_CODEC_H
 
 #include "pixelformat.h"
+#include "filesystem.h"
 #include "foundation/prerequest.h"
 #include <memory>
 #include <string>
@@ -28,7 +29,7 @@ public:
     const Pixel_RGBA8_uint* pixelArray() const;
 };
 
-std::shared_ptr<Image> decodeBmp(const std::string& path) noexcept(false);
+std::shared_ptr<Image> decodeBmp(const EnginePath& path) noexcept(false);
 
 GF_NAMESPACE_END
 

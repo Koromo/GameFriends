@@ -3,15 +3,21 @@
 
 GF_NAMESPACE_BEGIN
 
-Resource::Resource(const FilePath& path)
+Resource::Resource(const EnginePath& path)
     : path_(path)
+    , osPath_(fileSystem.toOSPath(path))
     , ready_(false)
 {
 }
 
-FilePath Resource::path() const
+EnginePath Resource::path() const
 {
     return path_;
+}
+
+std::string Resource::osPath() const
+{
+    return osPath_;
 }
 
 bool Resource::ready() const
@@ -26,7 +32,7 @@ void Resource::load()
         ready_ = loadImpl();
         if (ready_)
         {
-            GF_LOG_DEBUG("Resource {} loaded.", path_.os);
+            GF_LOG_DEBUG("Resource {} loaded.", osPath());
         }
     }
 }
@@ -36,7 +42,7 @@ void Resource::unload()
     if (ready_)
     {
         unloadImpl();
-        GF_LOG_DEBUG("Resource {} unloaded.", path_.os);
+        GF_LOG_DEBUG("Resource {} unloaded.", osPath());
         ready_ = false;
     }
 }
@@ -52,7 +58,7 @@ void ResourceManager::shutdown()
     GF_LOG_INFO("ResourceManager shutdown.");
 }
 
-void ResourceManager::destroy(const FilePath& path)
+void ResourceManager::destroy(const EnginePath& path)
 {
     const auto it = resourceMap_.find(path);
     if (it != std::cend(resourceMap_))
@@ -60,11 +66,6 @@ void ResourceManager::destroy(const FilePath& path)
         it->second->unload();
         resourceMap_.erase(it);
     }
-}
-
-void ResourceManager::destroy(const std::string& path)
-{
-    destroy(fileSystem.path(path));
 }
 
 void ResourceManager::clear()

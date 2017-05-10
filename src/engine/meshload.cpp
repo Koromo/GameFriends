@@ -55,11 +55,11 @@ bool Mesh::loadImpl()
 
     try
     {
-        file.read(path().os);
+        file.read(osPath());
     }
     catch (const Exception& e)
     {
-        GF_LOG_WARN("Failed to load mesh {}. {}", path().os, e.msg());
+        GF_LOG_WARN("Failed to load mesh {}. {}", osPath(), e.msg());
         return false;
     }
 
@@ -120,7 +120,7 @@ bool Mesh::loadImpl()
                 ".mesh requires Range: <begin> <count> in @SubMesh.");
             const auto& Range = SubMeshGroup.get("Range");
 
-            const auto material = resourceManager.template obtain<Material>(materialPath);
+            const auto material = resourceManager.template obtain<Material>(EnginePath(materialPath));
             material->load();
             enforce<MaterialLoadException>(material->ready(), "Failed to load material.");
 
@@ -136,7 +136,7 @@ bool Mesh::loadImpl()
     }
     catch (const ResourceException& e)
     {
-        GF_LOG_WARN("Failed to load mesh {}. {}", path().os, e.msg());
+        GF_LOG_WARN("Failed to load mesh {}. {}", osPath(), e.msg());
         unloadImpl();
         return false;
     }

@@ -48,7 +48,7 @@ void ShadeModelInput::directNumeric(ShaderType type, const std::string& name, co
     programParams_->updateConstant(type, name, data, size);
 }
 
-ShadeModel::ShadeModel(const FilePath& path)
+ShadeModel::ShadeModel(const EnginePath& path)
     : Resource(path)
     , drawCall_()
     , program_()

@@ -1,62 +1,52 @@
 #include "filesystem.h"
 #include "logging.h"
-#include "../windowing/windowsinc.h" // instead of unistd.h
+#include "../windowing/windowsinc.h"
 #include "foundation/string.h"
 #include "foundation/exception.h"
 #include <Shlwapi.h>
 
 GF_NAMESPACE_BEGIN
 
-bool operator ==(const FilePath& a, const FilePath& b)
+bool operator ==(const EnginePath& a, const EnginePath& b)
 {
-    return a.os == b.os;
+    return a.s == b.s;
 }
 
-bool operator !=(const FilePath& a, const FilePath& b)
+bool operator !=(const EnginePath& a, const EnginePath& b)
 {
     return !(a == b);
 }
 
-bool operator <(const FilePath& a, const FilePath& b)
+bool operator <(const EnginePath& a, const EnginePath& b)
 {
-    return a.os < b.os;
+    return a.s < b.s;
 }
 
-bool operator <=(const FilePath& a, const FilePath& b)
+bool operator <=(const EnginePath& a, const EnginePath& b)
 {
-    return a.os <= b.os;
+    return a.s <= b.s;
 }
 
-bool operator >(const FilePath& a, const FilePath& b)
+bool operator >(const EnginePath& a, const EnginePath& b)
 {
-    return a.os > b.os;
+    return a.s > b.s;
 }
 
-bool operator >=(const FilePath& a, const FilePath& b)
+bool operator >=(const EnginePath& a, const EnginePath& b)
 {
-    return a.os >= b.os;
+    return a.s >= b.s;
 }
 
-void FileSystem::startup(const std::string& rootDirectory)
+void FileSystem::startup(const std::string& engineRoot)
 {
-    if (!PathIsDirectoryA(rootDirectory.c_str()))
+    if (!PathIsDirectoryA(engineRoot.c_str()))
     {
-        GF_LOG_ERROR("FileSystem initialization error. ""[]"" is invalid relative path or directory not exists.", rootDirectory);
-        throw FileSystemError("The required root directory (" + rootDirectory + ") is not exists.");
+        GF_LOG_ERROR("FileSystem initialization error. {} is invalid relative path or directory not exists.", engineRoot);
+        throw FileSystemError("The required root directory (" + engineRoot + ") is not exists.");
     }
 
-    if (isOSPath(rootDirectory))
-    {
-        osRootPath_ = standard(rootDirectory);
-    }
-    else
-    {
-        char_t buf[256];
-        GetCurrentDirectory(256, buf);
-        osRootPath_ = standard(narrow(buf) + '/' + rootDirectory);
-    }
-
-    GF_LOG_INFO("FileSystem initialized. The current directory is {}.", osRootPath_);
+    engineRootPath_ = engineRoot;
+    GF_LOG_INFO("FileSystem initialized. Engine root directory is {}.", engineRootPath_);
 }
 
 void FileSystem::shutdown()
@@ -64,155 +54,74 @@ void FileSystem::shutdown()
     GF_LOG_INFO("FileSystem shutdown.");
 }
 
-std::string FileSystem::standard(const std::string& path) const
+namespace
 {
-    if (path.empty())
+    std::string standardRelative(const std::string& path)
     {
-        return "";
-    }
-
-    auto s = tolowers(path);
-    for (auto p = s.find("\\"); p != std::string::npos; p = s.find("\\", p + 1))
-    {
-        s.replace(p, 1, "/");
-    }
-    for (auto p = s.find("//"); p != std::string::npos; p = s.find("//", p))
-    {
-        s.replace(p, 1, "/");
-    }
-
-    std::string prefix;
-    if (isOSPath(s))
-    {
-        if (s[0] == '/')
+        if (path.empty())
         {
-            prefix = s[0];
-            s.erase(0, 1);
+            return "";
+        }
+
+        auto s = tolowers(path);
+        for (auto p = s.find("\\"); p != std::string::npos; p = s.find("\\", p + 1))
+        {
+            s.replace(p, 1, "/");
+        }
+        for (auto p = s.find("//"); p != std::string::npos; p = s.find("//", p))
+        {
+            s.replace(p, 1, "/");
+        }
+
+        auto p = s.rfind('/');
+        if (p == std::string::npos)
+        {
+            p = 0;
         }
         else
         {
-            prefix = s.substr(0, 3);
-            s.erase(0, 3);
+            p += 1;
         }
-    }
 
-    if (s.back() == '/')
-    {
-        s.pop_back();
-    }
-
-    auto p = s.rfind('/');
-    if (p == std::string::npos)
-    {
-        p = 0;
-    }
-    else
-    {
-        p += 1;
-    }
-
-    while (p > 0)
-    {
-        auto q = s.rfind('/', p - 2);
-        if (q == std::string::npos)
+        while (p > 0)
         {
-            q = 0;
+            auto q = s.rfind('/', p - 2);
+            if (q == std::string::npos)
+            {
+                q = 0;
+            }
+            else
+            {
+                q += 1;
+            }
+
+            if (s[q] == '.' && s[q + 1] == '/')
+            {
+                s.erase(q, 2);
+            }
+            else if (s.length() - q >= 3 && s[p] == '.' && s[p + 1] == '.' && s[p + 2] == '/')
+            {
+            }
+            else if (s.length() - p >= 3 && s[p] == '.' && s[p + 1] == '.' && s[p + 2] == '/')
+            {
+                s.erase(q, p - q);
+            }
+
+            p = q;
         }
 
-        if (s[q] == '.' && s[q + 1] == '/')
-        {
-            s.erase(q, 2);
-        }
-        else if (s.length() - p >= 3 && s[p] == '.' && s[p + 1] == '.' && s[p + 2] == '/')
-        {
-            s.erase(q, p - q);
-        }
-        p = q;
+        return s;
     }
-
-    if (prefix.length() + s.length() == 0)
-    {
-        s = "./";
-    }
-
-    return prefix + s;
 }
 
-std::string FileSystem::toOSPath(const std::string& path) const
+EnginePath FileSystem::standard(const EnginePath& path) const
 {
-    if (isOSPath(path))
-    {
-        return standard(path);
-    }
-    return standard(osRootPath_ + '/' + path);
+    return EnginePath{ standardRelative(path.s) };
 }
 
-std::string FileSystem::toRelativePath(const std::string& path) const
+std::string FileSystem::toOSPath(const EnginePath& path) const
 {
-    if (!isOSPath(path))
-    {
-        return standard(path);
-    }
-    if (tolower(path[0]) != osRootPath_[0])
-    {
-        return standard(path);
-    }
-    if (path == osRootPath_)
-    {
-        return "./";
-    }
-
-    const auto pathSlash = standard(path) + '/';
-    const auto rootPathSlash = osRootPath_ + '/';
-
-    int diffAt = 0;
-    for (size_t p = 0; p < pathSlash.length() && p < rootPathSlash.length() &&
-        pathSlash[p] == rootPathSlash[p]; ++p)
-    {
-        if (rootPathSlash[p] == '/')
-        {
-            diffAt = p;
-        }
-    }
-
-    int back = 0;
-    for (size_t p = diffAt + 1; p < rootPathSlash.length(); ++p)
-    {
-        back += rootPathSlash[p] == '/';
-    }
-
-    std::string ret;
-    for (int i = 0; i < back; ++i)
-    {
-        ret += "../";
-    }
-    ret += pathSlash.substr(diffAt + 1);
-
-    return ret;
-}
-
-bool FileSystem::isOSPath(const std::string& path) const
-{
-    if (!path.empty())
-    {
-        if (path[0] == '/')
-        {
-            return true;
-        }
-        if (path.length() >= 2 && tolower(path[0]) >= 'a' && tolower(path[0]) <= 'z' && path[1] == ':')
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-FilePath FileSystem::path(const std::string& path) const
-{
-    FilePath filePath;
-    filePath.relative = toRelativePath(path);
-    filePath.os = toOSPath(path);
-    return filePath;
+    return engineRootPath_ + '/' + path.s;
 }
 
 FileSystem fileSystem;

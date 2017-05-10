@@ -13,7 +13,7 @@ GF_NAMESPACE_BEGIN
 
 namespace
 {
-    const auto DEBUG_MATERIAL = "engine/debugdraw.material";
+    const auto DEBUG_MATERIAL = EnginePath("engine/debugdraw.material");
 }
 
 void DebugDraw::startup()

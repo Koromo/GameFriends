@@ -125,7 +125,7 @@ private:
     std::unordered_map<std::string, ShaderHold> compiledShaders_;
 
 public:
-    HLSLShader(const FilePath& path);
+    HLSLShader(const EnginePath& path);
 
     void setModel(const std::string& model);
     void setEntry(const std::string& entry);

@@ -7,7 +7,7 @@
 
 GF_NAMESPACE_BEGIN
 
-Material::Material(const FilePath& path)
+Material::Material(const EnginePath& path)
     : Resource(path)
     , params_()
     , shadeModelIn_()

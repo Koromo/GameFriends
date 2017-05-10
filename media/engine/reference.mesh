@@ -10,6 +10,6 @@ I:	# Indices int
 
 @SubMesh0
 Name: surface
-Material: reference.material
+Material: engine/reference.material
 Indexed: 1	# boolean
 Range: 0 6	# Vertex rage

@@ -6,7 +6,7 @@
 
 GF_NAMESPACE_BEGIN
 
-Mesh::Mesh(const FilePath& path)
+Mesh::Mesh(const EnginePath& path)
     : Resource(path)
     , vertexData_()
     , subMeshes_()

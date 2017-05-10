@@ -31,7 +31,7 @@ private:
     ResourceInterface<const ShadeModel> shadeModel_;
 
 public:
-    explicit Material(const FilePath& path);
+    explicit Material(const EnginePath& path);
 
     void setFloat(const std::string& name, float f);
     void setFloat(const std::string& name, double f);

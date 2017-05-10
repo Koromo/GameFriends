@@ -32,11 +32,11 @@ bool ShadeModel::loadImpl()
 
     try
     {
-        file.read(path().os);
+        file.read(osPath());
     }
     catch (const Exception& e)
     {
-        GF_LOG_WARN("Failed to load shade model {}. {}", path().os, e.msg());
+        GF_LOG_WARN("Failed to load shade model {}. {}", osPath(), e.msg());
         return false;
     }
 
@@ -163,7 +163,7 @@ bool ShadeModel::loadImpl()
     }
     catch (const ResourceException& e)
     {
-        GF_LOG_WARN("Failed to load shade model {}. {}", path().os, e.msg());
+        GF_LOG_WARN("Failed to load shade model {}. {}", osPath(), e.msg());
         unloadImpl();
         return false;
     }
@@ -186,11 +186,11 @@ bool Material::loadImpl()
 
     try
     {
-        file.read(path().os);
+        file.read(fileSystem.toOSPath(path()));
     }
     catch (const Exception& e)
     {
-        GF_LOG_WARN("Failed to load material {}. {}", path().os, e.msg());
+        GF_LOG_WARN("Failed to load material {}. {}", osPath(), e.msg());
         return false;
     }
 
@@ -204,7 +204,7 @@ bool Material::loadImpl()
             ".material requires Path: in @Shade.");
         const auto shadeModelPath = Shade.get("Path")[0];
 
-        const auto model = resourceManager.template obtain<ShadeModel>(shadeModelPath);
+        const auto model = resourceManager.template obtain<ShadeModel>(EnginePath(shadeModelPath));
         model->load();
         enforce<ShadeModelLoadException>(model->ready(), "Failed to load .shade.");
         shadeModel_ = model;
@@ -257,7 +257,7 @@ bool Material::loadImpl()
                 enforce<MaterialLoadException>(prop.size() >= 1,
                     name + " requires texture path in @Shade.");
                 const auto texPath = prop[0];
-                const auto tex = resourceManager.template obtain<MediaTexture>(texPath);
+                const auto tex = resourceManager.template obtain<MediaTexture>(EnginePath(texPath));
                 tex->load();
                 enforce<TextureLoadException>(tex->ready(), "Failed to load texture.");
                 holder.texture = tex;
@@ -267,7 +267,7 @@ bool Material::loadImpl()
     }
     catch (const ResourceException& e)
     {
-        GF_LOG_WARN("Failed to load material {}. {}", path().os, e.msg());
+        GF_LOG_WARN("Failed to load material {}. {}", osPath(), e.msg());
         unloadImpl();
         return false;
     }

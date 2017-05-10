@@ -65,14 +65,17 @@ public:
 class Resource
 {
 private:
-    FilePath path_;
+    EnginePath path_;
+    std::string osPath_;
     bool ready_;
 
 public:
-    explicit Resource(const FilePath& path);
+    explicit Resource(const EnginePath& path);
     virtual ~Resource() = default;
 
-    FilePath path() const;
+    EnginePath path() const;
+    std::string osPath() const;
+
     bool ready() const;
     void load();
     void unload();
@@ -178,14 +181,14 @@ public:
 class ResourceManager
 {
 private:
-    std::unordered_map<FilePath, std::shared_ptr<Resource>> resourceMap_;
+    std::unordered_map<EnginePath, std::shared_ptr<Resource>> resourceMap_;
 
 public:
     void startup();
     void shutdown();
 
     template <class T, class... Args>
-    ResourceInterface<T> create(const FilePath& path, Args&&... args)
+    ResourceInterface<T> create(const EnginePath& path, Args&&... args)
     {
         const auto it = resourceMap_.find(path);
         if (it != std::cend(resourceMap_))
@@ -198,14 +201,8 @@ public:
         return ResourceInterface<T>::create(r);
     }
 
-    template <class T, class... Args>
-    ResourceInterface<T> create(const std::string& path, Args&&... args)
-    {
-        return create<T>(fileSystem.path(path), std::forward<Args>(args)...);
-    }
-
     template <class T>
-    ResourceInterface<T> get(const FilePath& path)
+    ResourceInterface<T> get(const EnginePath& path)
     {
         const auto it = resourceMap_.find(path);
         if (it == std::cend(resourceMap_))
@@ -215,16 +212,10 @@ public:
         return ResourceInterface<T>::create(std::dynamic_pointer_cast<T>(it->second));
     }
 
-    template <class T>
-    ResourceInterface<T> get(const std::string& path)
-    {
-        return get<T>(fileSystem.path(path));
-    }
-
     template <class T, class... Args>
-    ResourceInterface<T> obtain(const FilePath& path, Args&&... args)
+    ResourceInterface<T> obtain(const EnginePath& path, Args&&... args)
     {
-        const auto p = get<T>(path.os);
+        const auto p = get<T>(path);
         if (!p)
         {
             return create<T>(path, std::forward<Args>(args)...);
@@ -232,14 +223,7 @@ public:
         return p;
     }
 
-    template <class T, class... Args>
-    ResourceInterface<T> obtain(const std::string& path, Args&&... args)
-    {
-        return obtain<T>(fileSystem.path(path), std::forward<Args>(args)...);
-    }
-
-    void destroy(const FilePath& path);
-    void destroy(const std::string& path);
+    void destroy(const EnginePath& path);
     void clear();
 };
 

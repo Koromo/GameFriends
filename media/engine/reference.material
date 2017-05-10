@@ -1,5 +1,5 @@
 @Shade
-Path: reference.shade
+Path: engine/reference.shade
 x: 3.2
 xyzw: 0.2 0.1 0.0 1.0
 matrix: 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1

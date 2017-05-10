@@ -56,7 +56,7 @@ private:
     std::vector<std::pair<std::string, MatParamType>> params_;
 
 public:
-    explicit ShadeModel(const FilePath& path);
+    explicit ShadeModel(const EnginePath& path);
 
     std::shared_ptr<ShadeModelInput> createInput() const;
 

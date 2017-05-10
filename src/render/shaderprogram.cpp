@@ -201,7 +201,7 @@ void ShaderParameters::createBindingMap(ID3D12ShaderReflection* shader, const Sh
     }
 }
 
-HLSLShader::HLSLShader(const FilePath& path)
+HLSLShader::HLSLShader(const EnginePath& path)
     : Resource(path)
     , model_()
     , entry_()
@@ -253,7 +253,7 @@ CompiledShader HLSLShader::compile()
         ID3DBlob* blob;
         ID3DBlob* err = NULL;
 
-        const auto hr = D3DCompileFromFile(widen(path().os).c_str(), d3dMacros.data(), D3D_COMPILE_STANDARD_FILE_INCLUDE,
+        const auto hr = D3DCompileFromFile(widen(osPath()).c_str(), d3dMacros.data(), D3D_COMPILE_STANDARD_FILE_INCLUDE,
             entry_.c_str(), model_.c_str(), FLAGS, 0, &blob, &err);
         if (FAILED(hr))
         {
@@ -264,8 +264,8 @@ CompiledShader HLSLShader::compile()
                 GF_LOG_ERROR("Shader compile error. {}", msg);
                 throw ShaderCompileError(msg);
             }
-            GF_LOG_ERROR("Shader compile error. File not found {}", path().os);
-            throw ShaderCompileError("File not found (" + path().os + ").");
+            GF_LOG_ERROR("Shader compile error. File not found {}", osPath());
+            throw ShaderCompileError("File not found (" + osPath() + ").");
         }
 
         compiled.code = makeComPtr(blob);
@@ -323,7 +323,7 @@ void ShaderProgram::compile(ShaderType type, const std::string& path, const std:
         check(false);
     }
 
-    const auto shaderFile = resourceManager.template obtain<HLSLShader>(path);
+    const auto shaderFile = resourceManager.template obtain<HLSLShader>(EnginePath(path));
     shaderFile->load();
 
     shaderFile->setEntry(entry);
