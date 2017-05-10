@@ -1,8 +1,8 @@
 #include "filesystem.h"
 #include "logging.h"
 #include "../windowing/windowsinc.h"
-#include "foundation/string.h"
 #include "foundation/exception.h"
+#include "foundation/uri.h"
 #include <Shlwapi.h>
 
 GF_NAMESPACE_BEGIN
@@ -45,8 +45,20 @@ void FileSystem::startup(const std::string& engineRoot)
         throw FileSystemError("The required root directory (" + engineRoot + ") is not exists.");
     }
 
-    engineRootPath_ = engineRoot;
-    GF_LOG_INFO("FileSystem initialized. Engine root directory is {}.", engineRootPath_);
+    char cur[512];
+    GetCurrentDirectoryA(512, cur);
+    osCurDir_ = Uri::uniform(cur);
+
+    if (Uri::isAbsolute(engineRoot))
+    {
+        engineRoot_ = Uri::uniform(engineRoot);
+    }
+    else
+    {
+        engineRoot_ = Uri::absolutePath(cur, engineRoot);
+    }
+
+    GF_LOG_INFO("FileSystem initialized. Engine root directory is {}.", engineRoot_);
 }
 
 void FileSystem::shutdown()
@@ -54,74 +66,14 @@ void FileSystem::shutdown()
     GF_LOG_INFO("FileSystem shutdown.");
 }
 
-namespace
+EnginePath FileSystem::uniform(const EnginePath& path) const
 {
-    std::string standardRelative(const std::string& path)
-    {
-        if (path.empty())
-        {
-            return "";
-        }
-
-        auto s = tolowers(path);
-        for (auto p = s.find("\\"); p != std::string::npos; p = s.find("\\", p + 1))
-        {
-            s.replace(p, 1, "/");
-        }
-        for (auto p = s.find("//"); p != std::string::npos; p = s.find("//", p))
-        {
-            s.replace(p, 1, "/");
-        }
-
-        auto p = s.rfind('/');
-        if (p == std::string::npos)
-        {
-            p = 0;
-        }
-        else
-        {
-            p += 1;
-        }
-
-        while (p > 0)
-        {
-            auto q = s.rfind('/', p - 2);
-            if (q == std::string::npos)
-            {
-                q = 0;
-            }
-            else
-            {
-                q += 1;
-            }
-
-            if (s[q] == '.' && s[q + 1] == '/')
-            {
-                s.erase(q, 2);
-            }
-            else if (s.length() - q >= 3 && s[p] == '.' && s[p + 1] == '.' && s[p + 2] == '/')
-            {
-            }
-            else if (s.length() - p >= 3 && s[p] == '.' && s[p + 1] == '.' && s[p + 2] == '/')
-            {
-                s.erase(q, p - q);
-            }
-
-            p = q;
-        }
-
-        return s;
-    }
-}
-
-EnginePath FileSystem::standard(const EnginePath& path) const
-{
-    return EnginePath{ standardRelative(path.s) };
+    return EnginePath{ Uri::uniform(path.s) };
 }
 
 std::string FileSystem::toOSPath(const EnginePath& path) const
 {
-    return engineRootPath_ + '/' + path.s;
+    return Uri::relativePath(osCurDir_, engineRoot_ + '/' + path.s);
 }
 
 FileSystem fileSystem;

@@ -148,6 +148,7 @@
     <ClInclude Include="src\foundation\sortedvector.h" />
     <ClInclude Include="src\foundation\string.h" />
     <ClInclude Include="src\foundation\traits.h" />
+    <ClInclude Include="src\foundation\uri.h" />
     <ClInclude Include="src\foundation\utility.h" />
     <ClInclude Include="src\foundation\vector2.h" />
     <ClInclude Include="src\foundation\vector3.h" />
@@ -164,6 +165,7 @@
     <ClCompile Include="src\foundation\plane.cpp" />
     <ClCompile Include="src\foundation\quaternion.cpp" />
     <ClCompile Include="src\foundation\string.cpp" />
+    <ClCompile Include="src\foundation\uri.cpp" />
     <ClCompile Include="src\foundation\vector2.cpp" />
     <ClCompile Include="src\foundation\vector3.cpp" />
     <ClCompile Include="src\foundation\vector4.cpp" />

@@ -32,13 +32,14 @@ bool operator >=(const EnginePath& a, const EnginePath& b);
 class FileSystem
 {
 private:
-    std::string engineRootPath_;
+    std::string osCurDir_;
+    std::string engineRoot_;
 
 public:
     void startup(const std::string& engineRoot) noexcept(false);
     void shutdown();
 
-    EnginePath standard(const EnginePath& path) const;
+    EnginePath uniform(const EnginePath& path) const;
     std::string toOSPath(const EnginePath& path) const;
 };
 
